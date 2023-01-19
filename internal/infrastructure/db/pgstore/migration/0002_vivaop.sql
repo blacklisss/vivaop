@@ -51,6 +51,8 @@ CREATE UNIQUE INDEX ON "users" ("phone");
 
 CREATE UNIQUE INDEX ON "countries" ("name");
 
+CREATE UNIQUE INDEX ON "countries" ("name_en");
+
 CREATE UNIQUE INDEX ON "countries" ("code");
 
 COMMENT ON COLUMN "users"."fname" IS 'first name';

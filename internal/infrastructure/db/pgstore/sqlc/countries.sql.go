@@ -7,6 +7,8 @@ package pgstore
 
 import (
 	"context"
+	"vivaop/internal/entities/countryentity"
+	"vivaop/internal/usecases/app/repos/countryrepo"
 )
 
 const createCountry = `-- name: CreateCountry :one
@@ -15,13 +17,7 @@ VALUES ($1, $2, $3)
 RETURNING id, name, name_en, code, created_at, updated_at, deleted_at
 `
 
-type CreateCountryParams struct {
-	Name   string `json:"name"`
-	NameEn string `json:"name_en"`
-	Code   string `json:"code"`
-}
-
-func (q *Queries) CreateCountry(ctx context.Context, arg CreateCountryParams) (Country, error) {
+func (q *Queries) CreateCountry(ctx context.Context, arg countryrepo.CreateCountryParams) (*countryentity.Country, error) {
 	row := q.db.QueryRowContext(ctx, createCountry, arg.Name, arg.NameEn, arg.Code)
 	var i Country
 	err := row.Scan(
@@ -33,7 +29,12 @@ func (q *Queries) CreateCountry(ctx context.Context, arg CreateCountryParams) (C
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
-	return i, err
+	return &countryentity.Country{
+		ID:     i.ID,
+		Name:   i.Name,
+		NameEn: i.NameEn,
+		Code:   i.Code,
+	}, err
 }
 
 const deleteCountry = `-- name: DeleteCountry :exec
@@ -47,37 +48,15 @@ func (q *Queries) DeleteCountry(ctx context.Context, id int32) error {
 	return err
 }
 
-const getCountryForUpdate = `-- name: GetCountryForUpdate :one
-SELECT id, name, name_en, code, created_at, updated_at, deleted_at
-FROM countries
-WHERE id = $1
-LIMIT 1 FOR NO KEY UPDATE
-`
-
-func (q *Queries) GetCountryForUpdate(ctx context.Context, id int32) (Country, error) {
-	row := q.db.QueryRowContext(ctx, getCountryForUpdate, id)
-	var i Country
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.NameEn,
-		&i.Code,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.DeletedAt,
-	)
-	return i, err
-}
-
-const read = `-- name: Read :one
+const getCountry = `-- name: GetCountry :one
 SELECT id, name, name_en, code, created_at, updated_at, deleted_at
 FROM countries
 WHERE id = $1
 LIMIT 1
 `
 
-func (q *Queries) Read(ctx context.Context, id int32) (Country, error) {
-	row := q.db.QueryRowContext(ctx, read, id)
+func (q *Queries) GetCountry(ctx context.Context, id int32) (*countryentity.Country, error) {
+	row := q.db.QueryRowContext(ctx, getCountry, id)
 	var i Country
 	err := row.Scan(
 		&i.ID,
@@ -88,21 +67,26 @@ func (q *Queries) Read(ctx context.Context, id int32) (Country, error) {
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
-	return i, err
+	return &countryentity.Country{
+		ID:     i.ID,
+		Name:   i.Name,
+		NameEn: i.NameEn,
+		Code:   i.Code,
+	}, err
 }
 
-const readAll = `-- name: ReadAll :many
+const listCountries = `-- name: ListCountries :many
 SELECT id, name, name_en, code, created_at, updated_at, deleted_at
 FROM countries
 `
 
-func (q *Queries) ReadAll(ctx context.Context) ([]Country, error) {
-	rows, err := q.db.QueryContext(ctx, readAll)
+func (q *Queries) ListCountries(ctx context.Context) ([]*countryentity.Country, error) {
+	rows, err := q.db.QueryContext(ctx, listCountries)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Country{}
+	items := []*countryentity.Country{}
 	for rows.Next() {
 		var i Country
 		if err := rows.Scan(
@@ -116,7 +100,13 @@ func (q *Queries) ReadAll(ctx context.Context) ([]Country, error) {
 		); err != nil {
 			return nil, err
 		}
-		items = append(items, i)
+		c := &countryentity.Country{
+			ID:     i.ID,
+			Name:   i.Name,
+			NameEn: i.NameEn,
+			Code:   i.Code,
+		}
+		items = append(items, c)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

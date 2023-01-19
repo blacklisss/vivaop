@@ -6,14 +6,26 @@ package pgstore
 
 import (
 	"context"
+	"vivaop/internal/entities/countryentity"
+	"vivaop/internal/entities/userentity"
+	"vivaop/internal/usecases/app/repos/countryrepo"
+	"vivaop/internal/usecases/app/repos/userrepo"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
-	CreateCountry(ctx context.Context, arg CreateCountryParams) (Country, error)
+	CreateCountry(ctx context.Context, args countryrepo.CreateCountryParams) (*countryentity.Country, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
+	CreateUser(ctx context.Context, arg *userrepo.CreateUserParams) (*userentity.User, error)
 	DeleteCountry(ctx context.Context, id int32) error
-	GetCountryForUpdate(ctx context.Context, id int32) (Country, error)
-	Read(ctx context.Context, id int32) (Country, error)
-	ReadAll(ctx context.Context) ([]Country, error)
+	DeleteUser(ctx context.Context, id uuid.UUID) error
+	GetCountry(ctx context.Context, id int32) (*countryentity.Country, error)
+	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
+	GetUserByEmail(ctx context.Context, email string) (*userentity.User, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (*userentity.User, error)
+	GetUserByPhone(ctx context.Context, phone string) (*userentity.User, error)
+	ListCountries(ctx context.Context) ([]*countryentity.Country, error)
 	UpdateCountry(ctx context.Context, arg UpdateCountryParams) (Country, error)
 }
 

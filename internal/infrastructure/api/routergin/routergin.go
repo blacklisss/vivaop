@@ -1,112 +1,44 @@
 package routergin
 
 import (
-	"fmt"
-	"gb/backend1_homework/reguser/internal/infrastructure/api/auth"
-	"gb/backend1_homework/reguser/internal/infrastructure/api/handler"
-	"net/http"
+	"vivaop/internal/infrastructure/api/handlers"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/render"
-	"github.com/google/uuid"
 )
 
 type RouterGin struct {
 	*gin.Engine
-	hs *handler.Handlers
+	hs *handlers.Handlers
 }
 
-func NewRouterGin(hs *handler.Handlers) *RouterGin {
+func NewRouterGin(hs *handlers.Handlers) *RouterGin {
 	r := gin.Default()
 	ret := &RouterGin{
 		hs: hs,
 	}
 
-	r.Use(auth.GinAuthMW)
-
-	r.POST("/create", ret.CreateUser)
-	r.GET("/read/:id", ret.ReadUser)
-	r.DELETE("/delete/:id", ret.DeleteUser)
-	r.GET("/search/:q", ret.SearchUser)
+	ret.setupRouter(r)
 
 	ret.Engine = r
 	return ret
 }
 
-type User handler.User
+func (router *RouterGin) setupRouter(r *gin.Engine) {
+	r.POST("/countries", router.CreateCountry)
+	r.GET("/countries", router.ShowCountries)
 
-func (rt *RouterGin) CreateUser(c *gin.Context) {
-	ru := User{}
-	if err := c.ShouldBindJSON(&ru); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	r.POST("/users", router.CreateUser)
+	/*router.POST("/users/login", server.loginUser)
+	router.POST("/tokens/renew_access", server.renewAccessToken)
 
-	u, err := rt.hs.CreateUser(c.Request.Context(), handler.User(ru))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	authRoutes.POST("/accounts", server.createAccount)
+	authRoutes.GET("/accounts/:id", server.getAccount)
+	authRoutes.GET("/accounts", server.listAccounts)
 
-	c.JSON(http.StatusOK, u)
+	authRoutes.POST("/transfers", server.createTransfer)*/
 }
 
-func (rt *RouterGin) ReadUser(c *gin.Context) {
-	sid := c.Param("id")
-
-	uid, err := uuid.Parse(sid)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	u, err := rt.hs.ReadUser(c.Request.Context(), uid)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, u)
-}
-
-func (rt *RouterGin) DeleteUser(c *gin.Context) {
-	sid := c.Param("id")
-
-	uid, err := uuid.Parse(sid)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	u, err := rt.hs.DeleteUser(c.Request.Context(), uid)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, u)
-}
-
-func (rt *RouterGin) SearchUser(c *gin.Context) {
-	q := c.Param("id")
-	w := c.Writer
-	fmt.Fprintln(w, "[")
-	comma := false
-	err := rt.hs.SearchUser(c.Request.Context(), q, func(u handler.User) error {
-		if comma {
-			fmt.Fprintln(w, ",")
-		} else {
-			comma = true
-		}
-		(render.JSON{Data: u}).Render(w)
-		w.Flush()
-		return nil
-	})
-	if err != nil {
-		if comma {
-			fmt.Fprint(w, ",")
-		}
-		(render.JSON{Data: err}).Render(w)
-	}
-	fmt.Fprintln(w, "]")
+func errorResponse(err error) gin.H {
+	return gin.H{"error": err.Error()}
 }

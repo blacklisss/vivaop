@@ -8,12 +8,15 @@ package pgstore
 import (
 	"context"
 	"database/sql"
+	"vivaop/internal/entities/userentity"
+	"vivaop/internal/usecases/app/repos/userrepo"
 
 	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
+	id,
     fname,
     mname,
     lname,
@@ -22,10 +25,11 @@ INSERT INTO users (
     password,
     birthdate,
     country_id
-) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8 ) RETURNING id, fname, mname, lname, email, phone, password, birthdate, country_id, created_at, updated_at, deleted_at
+) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9 ) RETURNING id, fname, mname, lname, email, phone, password, birthdate, country_id, created_at, updated_at, deleted_at
 `
 
 type CreateUserParams struct {
+	ID        uuid.UUID      `json:"id"`
 	Fname     sql.NullString `json:"fname"`
 	Mname     sql.NullString `json:"mname"`
 	Lname     sql.NullString `json:"lname"`
@@ -36,8 +40,9 @@ type CreateUserParams struct {
 	CountryID sql.NullInt32  `json:"country_id"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg *userrepo.CreateUserParams) (*userentity.User, error) {
 	row := q.db.QueryRowContext(ctx, createUser,
+		arg.ID,
 		arg.Fname,
 		arg.Mname,
 		arg.Lname,
@@ -62,7 +67,19 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
-	return i, err
+
+	return &userentity.User{
+		ID:        i.ID,
+		FName:     i.Fname.String,
+		MName:     i.Mname.String,
+		LName:     i.Lname.String,
+		Email:     i.Email,
+		Phone:     i.Phone,
+		Password:  i.Password,
+		Birthday:  i.Birthdate.Time.String(),
+		CountryID: i.CountryID.Int32,
+		CreatedAt: i.CreatedAt,
+	}, err
 }
 
 const deleteUser = `-- name: DeleteUser :exec
@@ -81,7 +98,7 @@ SELECT id, fname, mname, lname, email, phone, password, birthdate, country_id, c
 WHERE email = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (*userentity.User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
@@ -98,7 +115,16 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
-	return i, err
+	return &userentity.User{
+		ID:       i.ID,
+		FName:    i.Fname.String,
+		MName:    i.Mname.String,
+		LName:    i.Lname.String,
+		Email:    i.Email,
+		Phone:    i.Phone,
+		Password: i.Password,
+		Birthday: i.Birthdate.Time.String(),
+	}, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
@@ -106,7 +132,7 @@ SELECT id, fname, mname, lname, email, phone, password, birthdate, country_id, c
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (*userentity.User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(
@@ -123,7 +149,16 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
-	return i, err
+	return &userentity.User{
+		ID:       i.ID,
+		FName:    i.Fname.String,
+		MName:    i.Mname.String,
+		LName:    i.Lname.String,
+		Email:    i.Email,
+		Phone:    i.Phone,
+		Password: i.Password,
+		Birthday: i.Birthdate.Time.String(),
+	}, err
 }
 
 const getUserByPhone = `-- name: GetUserByPhone :one
@@ -131,7 +166,7 @@ SELECT id, fname, mname, lname, email, phone, password, birthdate, country_id, c
 WHERE phone = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserByPhone(ctx context.Context, phone string) (User, error) {
+func (q *Queries) GetUserByPhone(ctx context.Context, phone string) (*userentity.User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByPhone, phone)
 	var i User
 	err := row.Scan(
@@ -148,5 +183,14 @@ func (q *Queries) GetUserByPhone(ctx context.Context, phone string) (User, error
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
-	return i, err
+	return &userentity.User{
+		ID:       i.ID,
+		FName:    i.Fname.String,
+		MName:    i.Mname.String,
+		LName:    i.Lname.String,
+		Email:    i.Email,
+		Phone:    i.Phone,
+		Password: i.Password,
+		Birthday: i.Birthdate.Time.String(),
+	}, err
 }

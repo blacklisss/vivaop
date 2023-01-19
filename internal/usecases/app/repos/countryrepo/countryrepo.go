@@ -3,15 +3,20 @@ package countryrepo
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"vivaop/internal/entities/countryentity"
 )
 
+type CreateCountryParams struct {
+	Name   string `json:"name"`
+	NameEn string `json:"name_en"`
+	Code   string `json:"code"`
+}
+
 type CountryStore interface {
-	Create(ctx context.Context, name string, name_en string, code string) (*countryentity.Country, error)
-	Read(ctx context.Context, id int64, r *http.Request) (*countryentity.Country, error)
-	ReadAll(ctx context.Context, r *http.Request) ([]*countryentity.Country, error)
-	Delete(ctx context.Context, id int64, r *http.Request) error
+	CreateCountry(ctx context.Context, arg CreateCountryParams) (*countryentity.Country, error)
+	GetCountry(ctx context.Context, id int32) (*countryentity.Country, error)
+	ListCountries(ctx context.Context) ([]*countryentity.Country, error)
+	DeleteCountry(ctx context.Context, id int32) error
 }
 
 type Countries struct {
@@ -24,34 +29,34 @@ func NewCountries(cstore CountryStore) *Countries {
 	}
 }
 
-func (cs *Countries) Create(ctx context.Context, name string, name_en string, code string) (*countryentity.Country, error) {
-	country, err := cs.cstore.Create(ctx, name, name_en, code)
+func (cs *Countries) CreateCountry(ctx context.Context, arg CreateCountryParams) (*countryentity.Country, error) {
+	country, err := cs.cstore.CreateCountry(ctx, arg)
 	if err != nil {
 		return nil, fmt.Errorf("create country error: %w", err)
 	}
 	return country, nil
 }
 
-func (cs *Countries) Read(ctx context.Context, id int64, r *http.Request) (*countryentity.Country, error) {
-	country, err := cs.cstore.Read(ctx, id, r)
+func (cs *Countries) GetCountry(ctx context.Context, id int32) (*countryentity.Country, error) {
+	country, err := cs.cstore.GetCountry(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("read country error: %w", err)
 	}
 	return country, nil
 }
 
-func (cs *Countries) ReadAll(ctx context.Context, r *http.Request) ([]*countryentity.Country, error) {
-	countries, err := cs.cstore.ReadAll(ctx, r)
+func (cs *Countries) ListCountries(ctx context.Context) ([]*countryentity.Country, error) {
+	countries, err := cs.cstore.ListCountries(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("read country error: %w", err)
 	}
 	return countries, nil
 }
 
-func (cs *Countries) Delete(ctx context.Context, id int64, r *http.Request) (*countryentity.Country, error) {
-	country, err := cs.cstore.Read(ctx, id, r)
+func (cs *Countries) DeleteCountry(ctx context.Context, id int32) (*countryentity.Country, error) {
+	country, err := cs.cstore.GetCountry(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("delete country error: %w", err)
 	}
-	return country, cs.cstore.Delete(ctx, id, r)
+	return country, cs.cstore.DeleteCountry(ctx, id)
 }

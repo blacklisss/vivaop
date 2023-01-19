@@ -1,43 +1,61 @@
-package server
+package srv
 
 import (
 	"context"
-	"gb/backend1_course/internal/usecases/app/repos/linkrepo"
+	"fmt"
 	"net/http"
 	"time"
+	pgstore "vivaop/internal/infrastructure/db/pgstore/sqlc"
+	"vivaop/internal/infrastructure/token"
+	"vivaop/internal/util"
+
+	"github.com/rs/zerolog/log"
 )
 
 type Server struct {
-	srv http.Server
-	ln  *linkrepo.Links
+	store      pgstore.Store
+	tokenMaker token.Maker
+	config     *util.Config
+	srv        http.Server
 }
 
-func NewServer(addr string, h http.Handler) *Server {
+func NewServer(config *util.Config, store pgstore.Store, h http.Handler) (*Server, error) {
 	s := &Server{}
 
 	s.srv = http.Server{
-		Addr:              addr,
+		Addr:              config.HTTPServerAddress,
 		Handler:           h,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      30 * time.Second,
 		ReadHeaderTimeout: 30 * time.Second,
 	}
-	return s
+
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey) // config.TokenSymmetricKey
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker: %w", err)
+	}
+
+	s.tokenMaker = tokenMaker
+	s.store = store
+	s.config = config
+
+	return s, nil
 }
 
 func (s *Server) Stop() {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	err := s.srv.Shutdown(ctx)
+	_ = s.srv.Shutdown(ctx)
 	cancel()
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (s *Server) Start(ln *linkrepo.Links) {
-	s.ln = ln
+func (s *Server) Start() {
 	// TODO: migrations
 	go func() {
-		_ = s.srv.ListenAndServe()
+		err := s.srv.ListenAndServe()
+		if err != nil {
+			log.Fatal().
+				Err(err).
+				Msg("Cannot start server")
+		}
 	}()
 }
