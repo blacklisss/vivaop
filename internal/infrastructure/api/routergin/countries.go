@@ -20,7 +20,7 @@ func (router *RouterGin) CreateCountry(ctx *gin.Context) {
 		return
 	}
 
-	country, err := router.hs.CreateCountry(ctx, countryrepo.CreateCountryParams{
+	country, err := router.hs.CreateCountry(ctx, &countryrepo.CreateCountryParams{
 		Name:   req.Name,
 		NameEn: req.NameEn,
 		Code:   req.Code,

@@ -9,7 +9,9 @@ import (
 	"vivaop/internal/infrastructure/api/routergin"
 	pgstore "vivaop/internal/infrastructure/db/pgstore/sqlc"
 	srv "vivaop/internal/infrastructure/server"
+	"vivaop/internal/infrastructure/token"
 	"vivaop/internal/usecases/app/repos/countryrepo"
+	"vivaop/internal/usecases/app/repos/sessionrepo"
 	"vivaop/internal/usecases/app/repos/userrepo"
 	"vivaop/internal/util"
 
@@ -35,8 +37,17 @@ func main() {
 
 	cs := countryrepo.NewCountries(store)
 	us := userrepo.NewUsers(store)
-	hs := handlers.NewHandlers(us, cs)
-	router := routergin.NewRouterGin(hs)
+	ss := sessionrepo.NewSession(store)
+	hs := handlers.NewHandlers(us, cs, ss)
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey) // config.TokenSymmetricKey
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot create token maker")
+	}
+
+	router, err := routergin.NewRouterGin(&config, hs, tokenMaker)
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot create server engine")
+	}
 
 	server := runGinServer(&config, store, router)
 

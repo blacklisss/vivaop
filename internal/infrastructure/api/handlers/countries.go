@@ -17,7 +17,7 @@ type Country struct {
 	Code   string `json:"code,omitempty"`
 }
 
-func (rt *Handlers) CreateCountry(ctx context.Context, args countryrepo.CreateCountryParams) (Country, error) {
+func (rt *Handlers) CreateCountry(ctx context.Context, args *countryrepo.CreateCountryParams) (Country, error) {
 	c, err := rt.cs.CreateCountry(ctx, args)
 	if err != nil {
 		return Country{}, fmt.Errorf("error when creating: %w", err)

@@ -11,79 +11,49 @@ import (
 	"github.com/pkg/errors"
 )
 
-type User struct {
-	ID        uuid.UUID
-	CountryID int32
-	FName     string
-	MName     string
-	LName     string
-	Email     string
-	Phone     string
-	Password  string
-	Birthday  string
-}
-
 func (rt *Handlers) CreateUser(ctx context.Context, args *userrepo.CreateUserParams) (*userentity.User, error) {
 	user, err := rt.us.CreateUser(ctx, args)
 	if err != nil {
 		return &userentity.User{}, fmt.Errorf("error when creating: %w", err)
 	}
 
-	fmt.Println(user)
-	return &userentity.User{
-		ID:        user.ID,
-		FName:     user.FName,
-		MName:     user.MName,
-		LName:     user.LName,
-		Email:     user.Email,
-		Phone:     user.Phone,
-		Password:  user.Password,
-		Birthday:  user.Birthday,
-		CountryID: user.CountryID,
-		CreatedAt: user.CreatedAt,
-	}, nil
+	return user, nil
 }
 
 var ErrUserNotFound = errors.New("user not found")
 
-func (rt *Handlers) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
+func (rt *Handlers) GetUserByID(ctx context.Context, id uuid.UUID) (*userentity.User, error) {
 	user, err := rt.us.GetUserByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return User{}, ErrUserNotFound
+			return &userentity.User{}, ErrUserNotFound
 		}
-		return User{}, fmt.Errorf("error when reading: %w", err)
+		return &userentity.User{}, fmt.Errorf("error when reading: %w", err)
 	}
 
-	return User{
-		ID:       user.ID,
-		FName:    user.FName,
-		MName:    user.MName,
-		LName:    user.LName,
-		Email:    user.Email,
-		Phone:    user.Phone,
-		Password: user.Password,
-		Birthday: user.Birthday,
-	}, nil
+	return user, nil
 }
 
-func (rt *Handlers) DeleteUser(ctx context.Context, id uuid.UUID) (User, error) {
+func (rt *Handlers) GetUserByEmail(ctx context.Context, email string) (*userentity.User, error) {
+	user, err := rt.us.GetUserByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return &userentity.User{}, ErrUserNotFound
+		}
+		return &userentity.User{}, fmt.Errorf("error when reading: %w", err)
+	}
+
+	return user, nil
+}
+
+func (rt *Handlers) DeleteUser(ctx context.Context, id uuid.UUID) (*userentity.User, error) {
 	user, err := rt.us.DeleteUser(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return User{}, ErrUserNotFound
+			return &userentity.User{}, ErrUserNotFound
 		}
-		return User{}, fmt.Errorf("error when delete: %w", err)
+		return &userentity.User{}, fmt.Errorf("error when delete: %w", err)
 	}
 
-	return User{
-		ID:       user.ID,
-		FName:    user.FName,
-		MName:    user.MName,
-		LName:    user.LName,
-		Email:    user.Email,
-		Phone:    user.Phone,
-		Password: user.Password,
-		Birthday: user.Birthday,
-	}, nil
+	return user, nil
 }

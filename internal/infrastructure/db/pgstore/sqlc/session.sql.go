@@ -7,7 +7,8 @@ package pgstore
 
 import (
 	"context"
-	"database/sql"
+	"vivaop/internal/entities/sessionentity"
+	"vivaop/internal/usecases/app/repos/sessionrepo"
 
 	"github.com/google/uuid"
 )
@@ -15,31 +16,19 @@ import (
 const createSession = `-- name: CreateSession :one
 INSERT INTO sessions (
   id,
-  user_id,
   refresh_token,
   user_agent,
   client_ip,
   is_blocked,
   expires_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7
-) RETURNING id, user_id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at
+  $1, $2, $3, $4, $5, $6
+) RETURNING id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at
 `
 
-type CreateSessionParams struct {
-	ID           uuid.UUID    `json:"id"`
-	UserID       uuid.UUID    `json:"user_id"`
-	RefreshToken string       `json:"refresh_token"`
-	UserAgent    string       `json:"user_agent"`
-	ClientIp     string       `json:"client_ip"`
-	IsBlocked    sql.NullBool `json:"is_blocked"`
-	ExpiresAt    sql.NullTime `json:"expires_at"`
-}
-
-func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
+func (q *Queries) CreateSession(ctx context.Context, arg *sessionrepo.CreateSessionParams) (*sessionentity.Session, error) {
 	row := q.db.QueryRowContext(ctx, createSession,
 		arg.ID,
-		arg.UserID,
 		arg.RefreshToken,
 		arg.UserAgent,
 		arg.ClientIp,
@@ -49,7 +38,6 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 	var i Session
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
 		&i.RefreshToken,
 		&i.UserAgent,
 		&i.ClientIp,
@@ -57,20 +45,26 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 		&i.ExpiresAt,
 		&i.CreatedAt,
 	)
-	return i, err
+	return &sessionentity.Session{
+		ID:           i.ID,
+		RefreshToken: i.RefreshToken,
+		UserAgent:    i.UserAgent,
+		ClientIp:     i.ClientIp,
+		IsBlocked:    i.IsBlocked.Bool,
+		ExpiresAt:    i.ExpiresAt.Time,
+	}, err
 }
 
 const getSession = `-- name: GetSession :one
-SELECT id, user_id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at FROM sessions
+SELECT id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at FROM sessions
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (Session, error) {
+func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (*sessionentity.Session, error) {
 	row := q.db.QueryRowContext(ctx, getSession, id)
 	var i Session
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
 		&i.RefreshToken,
 		&i.UserAgent,
 		&i.ClientIp,
@@ -78,5 +72,12 @@ func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 		&i.ExpiresAt,
 		&i.CreatedAt,
 	)
-	return i, err
+	return &sessionentity.Session{
+		ID:           i.ID,
+		RefreshToken: i.RefreshToken,
+		UserAgent:    i.UserAgent,
+		ClientIp:     i.ClientIp,
+		IsBlocked:    i.IsBlocked.Bool,
+		ExpiresAt:    i.ExpiresAt.Time,
+	}, err
 }

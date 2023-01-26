@@ -36,7 +36,6 @@ CREATE TABLE "organizations" (
 
 CREATE TABLE "sessions" (
   "id" uuid PRIMARY KEY,
-  "user_id" uuid UNIQUE NOT NULL,
   "refresh_token" varchar NOT NULL,
   "user_agent" varchar NOT NULL,
   "client_ip" varchar NOT NULL,
@@ -67,4 +66,4 @@ ALTER TABLE "organizations" ADD FOREIGN KEY ("country_id") REFERENCES "countries
 
 ALTER TABLE "organizations" ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
 
-ALTER TABLE "sessions" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "sessions" ADD FOREIGN KEY ("id") REFERENCES "users" ("id");

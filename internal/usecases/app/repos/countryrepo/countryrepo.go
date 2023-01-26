@@ -13,7 +13,7 @@ type CreateCountryParams struct {
 }
 
 type CountryStore interface {
-	CreateCountry(ctx context.Context, arg CreateCountryParams) (*countryentity.Country, error)
+	CreateCountry(ctx context.Context, arg *CreateCountryParams) (*countryentity.Country, error)
 	GetCountry(ctx context.Context, id int32) (*countryentity.Country, error)
 	ListCountries(ctx context.Context) ([]*countryentity.Country, error)
 	DeleteCountry(ctx context.Context, id int32) error
@@ -29,7 +29,7 @@ func NewCountries(cstore CountryStore) *Countries {
 	}
 }
 
-func (cs *Countries) CreateCountry(ctx context.Context, arg CreateCountryParams) (*countryentity.Country, error) {
+func (cs *Countries) CreateCountry(ctx context.Context, arg *CreateCountryParams) (*countryentity.Country, error) {
 	country, err := cs.cstore.CreateCountry(ctx, arg)
 	if err != nil {
 		return nil, fmt.Errorf("create country error: %w", err)

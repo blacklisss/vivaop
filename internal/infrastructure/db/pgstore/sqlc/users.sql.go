@@ -124,6 +124,8 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (*userentity
 		Phone:    i.Phone,
 		Password: i.Password,
 		Birthday: i.Birthdate.Time.String(),
+		CountryID: i.CountryID.Int32,
+		CreatedAt: i.CreatedAt,
 	}, err
 }
 
@@ -158,6 +160,8 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (*userentity.Us
 		Phone:    i.Phone,
 		Password: i.Password,
 		Birthday: i.Birthdate.Time.String(),
+		CountryID: i.CountryID.Int32,
+		CreatedAt: i.CreatedAt,
 	}, err
 }
 
@@ -192,5 +196,7 @@ func (q *Queries) GetUserByPhone(ctx context.Context, phone string) (*userentity
 		Phone:    i.Phone,
 		Password: i.Password,
 		Birthday: i.Birthdate.Time.String(),
+		CountryID: i.CountryID.Int32,
+		CreatedAt: i.CreatedAt,
 	}, err
 }

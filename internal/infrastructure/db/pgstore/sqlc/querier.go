@@ -7,21 +7,23 @@ package pgstore
 import (
 	"context"
 	"vivaop/internal/entities/countryentity"
+	"vivaop/internal/entities/sessionentity"
 	"vivaop/internal/entities/userentity"
 	"vivaop/internal/usecases/app/repos/countryrepo"
+	"vivaop/internal/usecases/app/repos/sessionrepo"
 	"vivaop/internal/usecases/app/repos/userrepo"
 
 	"github.com/google/uuid"
 )
 
 type Querier interface {
-	CreateCountry(ctx context.Context, args countryrepo.CreateCountryParams) (*countryentity.Country, error)
-	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
+	CreateCountry(ctx context.Context, args *countryrepo.CreateCountryParams) (*countryentity.Country, error)
+	CreateSession(ctx context.Context, arg *sessionrepo.CreateSessionParams) (*sessionentity.Session, error)
 	CreateUser(ctx context.Context, arg *userrepo.CreateUserParams) (*userentity.User, error)
 	DeleteCountry(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 	GetCountry(ctx context.Context, id int32) (*countryentity.Country, error)
-	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
+	GetSession(ctx context.Context, userID uuid.UUID) (*sessionentity.Session, error)
 	GetUserByEmail(ctx context.Context, email string) (*userentity.User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (*userentity.User, error)
 	GetUserByPhone(ctx context.Context, phone string) (*userentity.User, error)

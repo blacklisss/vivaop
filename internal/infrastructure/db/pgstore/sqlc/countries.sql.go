@@ -17,7 +17,7 @@ VALUES ($1, $2, $3)
 RETURNING id, name, name_en, code, created_at, updated_at, deleted_at
 `
 
-func (q *Queries) CreateCountry(ctx context.Context, arg countryrepo.CreateCountryParams) (*countryentity.Country, error) {
+func (q *Queries) CreateCountry(ctx context.Context, arg *countryrepo.CreateCountryParams) (*countryentity.Country, error) {
 	row := q.db.QueryRowContext(ctx, createCountry, arg.Name, arg.NameEn, arg.Code)
 	var i Country
 	err := row.Scan(
