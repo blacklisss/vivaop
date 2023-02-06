@@ -22,14 +22,14 @@ type Country struct {
 }
 
 type Organization struct {
-	ID        uuid.UUID      `json:"id"`
-	Name      sql.NullString `json:"name"`
-	CountryID sql.NullInt32  `json:"country_id"`
-	OwnerID   uuid.NullUUID  `json:"owner_id"`
-	Verified  sql.NullBool   `json:"verified"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt sql.NullTime   `json:"updated_at"`
-	DeletedAt sql.NullTime   `json:"deleted_at"`
+	ID        uuid.UUID    `json:"id"`
+	Name      string       `json:"name"`
+	CountryID int32        `json:"country_id"`
+	OwnerID   uuid.UUID    `json:"owner_id"`
+	Verified  sql.NullBool `json:"verified"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
 }
 
 type Session struct {

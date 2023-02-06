@@ -21,11 +21,17 @@ type CreateSessionParams struct {
 type SessionStore interface {
 	CreateSession(ctx context.Context, args *CreateSessionParams) (*sessionentity.Session, error)
 	GetSession(ctx context.Context, userID uuid.UUID) (*sessionentity.Session, error)
-	DeleteUser(ctx context.Context, id uuid.UUID) error
+	DeleteSession(ctx context.Context, id uuid.UUID) error
 }
 
 type Session struct {
 	sstore SessionStore
+}
+
+func NewSession(sstore SessionStore) *Session {
+	return &Session{
+		sstore,
+	}
 }
 
 func (s *Session) CreateSession(ctx context.Context, args *CreateSessionParams) (*sessionentity.Session, error) {
@@ -46,8 +52,6 @@ func (s *Session) GetSession(ctx context.Context, id uuid.UUID) (*sessionentity.
 	return session, nil
 }
 
-func NewSession(sstore SessionStore) *Session {
-	return &Session{
-		sstore,
-	}
+func (s *Session) DeleteSession(ctx context.Context, id uuid.UUID) error {
+	return s.sstore.DeleteSession(ctx, id)
 }

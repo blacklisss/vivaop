@@ -25,9 +25,12 @@ CREATE TABLE "countries" (
 
 CREATE TABLE "organizations" (
   "id" uuid PRIMARY KEY,
-  "name" varchar,
-  "country_id" int,
-  "owner_id" uuid,
+  "name" varchar NOT NULL,
+  "country_id" int NOT NULL,
+  "owner_id" uuid NOT NULL,
+  "registration_code" varchar UNIQUE NOT NULL,
+  "registration_date" timestamp NOT NULL,
+  "registartion_image" varchar,
   "verified" bool DEFAULT false,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz,

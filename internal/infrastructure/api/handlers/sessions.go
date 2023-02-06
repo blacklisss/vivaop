@@ -26,3 +26,7 @@ func (rt *Handlers) GetSession(ctx context.Context, id uuid.UUID) (*sessionentit
 
 	return session, nil
 }
+
+func (rt *Handlers) DeleteSession(ctx context.Context, id uuid.UUID) error {
+	return rt.ss.DeleteSession(ctx, id)
+}

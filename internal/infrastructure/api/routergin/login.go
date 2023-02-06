@@ -71,6 +71,12 @@ func (router *RouterGin) loginUser(ctx *gin.Context) {
 		return
 	}
 
+	err = router.hs.DeleteSession(ctx, user.ID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 	session, err := router.hs.CreateSession(ctx, &sessionrepo.CreateSessionParams{
 		ID:           refreshPayload.ID,
 		RefreshToken: refreshToken,

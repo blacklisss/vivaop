@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 	"vivaop/internal/entities/userentity"
 	"vivaop/internal/usecases/app/repos/userrepo"
@@ -14,6 +15,7 @@ import (
 )
 
 type createUserRequest struct {
+	CountryID string `json:"country_id" binding:"required"`
 	Fname     string `json:"fname" binding:"required"`
 	Mname     string `json:"mname"`
 	Lname     string `json:"lname"`
@@ -21,7 +23,6 @@ type createUserRequest struct {
 	Phone     string `json:"phone" binding:"required"`
 	Password  string `json:"password" binding:"required"`
 	Birthdate string `json:"birthdate"`
-	CountryID int32  `json:"country_id" binding:"required"`
 }
 
 type userResponse struct {
@@ -61,13 +62,19 @@ func (router *RouterGin) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	birthdate, err := time.Parse("2006-01-02", req.Birthdate)
+	birthdate, err := time.Parse(time.RFC3339, req.Birthdate)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	uid, err := uuid.NewUUID()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	c_id, err := strconv.Atoi(req.CountryID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -82,7 +89,7 @@ func (router *RouterGin) CreateUser(ctx *gin.Context) {
 		Phone:     req.Phone,
 		Password:  hashedPassword,
 		Birthdate: sql.NullTime{Time: birthdate, Valid: true},
-		CountryID: sql.NullInt32{Int32: req.CountryID, Valid: true},
+		CountryID: sql.NullInt32{Int32: int32(c_id), Valid: true},
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))

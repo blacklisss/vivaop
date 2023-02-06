@@ -7,9 +7,11 @@ package pgstore
 import (
 	"context"
 	"vivaop/internal/entities/countryentity"
+	"vivaop/internal/entities/organizationentity"
 	"vivaop/internal/entities/sessionentity"
 	"vivaop/internal/entities/userentity"
 	"vivaop/internal/usecases/app/repos/countryrepo"
+	"vivaop/internal/usecases/app/repos/organizationrepo"
 	"vivaop/internal/usecases/app/repos/sessionrepo"
 	"vivaop/internal/usecases/app/repos/userrepo"
 
@@ -18,17 +20,25 @@ import (
 
 type Querier interface {
 	CreateCountry(ctx context.Context, args *countryrepo.CreateCountryParams) (*countryentity.Country, error)
+	CreateOrganization(ctx context.Context, params *organizationrepo.CreateOrganizationParams) (*organizationentity.Organization, error)
 	CreateSession(ctx context.Context, arg *sessionrepo.CreateSessionParams) (*sessionentity.Session, error)
 	CreateUser(ctx context.Context, arg *userrepo.CreateUserParams) (*userentity.User, error)
 	DeleteCountry(ctx context.Context, id int32) error
+	DeleteOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
+	DeleteSession(ctx context.Context, id uuid.UUID) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 	GetCountry(ctx context.Context, id int32) (*countryentity.Country, error)
+	GetOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
+	GetOrganizationByOwner(ctx context.Context, params *organizationrepo.GetOrganizationByOwnerParams) (*organizationentity.Organization, error)
 	GetSession(ctx context.Context, userID uuid.UUID) (*sessionentity.Session, error)
 	GetUserByEmail(ctx context.Context, email string) (*userentity.User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (*userentity.User, error)
 	GetUserByPhone(ctx context.Context, phone string) (*userentity.User, error)
 	ListCountries(ctx context.Context) ([]*countryentity.Country, error)
+	ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID) ([]*organizationentity.Organization, error)
 	UpdateCountry(ctx context.Context, arg UpdateCountryParams) (Country, error)
+	UpdateOrganization(ctx context.Context, arg *organizationrepo.UpdateOrganizationParams) (*organizationentity.Organization, error)
+	VerifyOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -11,6 +11,7 @@ import (
 	srv "vivaop/internal/infrastructure/server"
 	"vivaop/internal/infrastructure/token"
 	"vivaop/internal/usecases/app/repos/countryrepo"
+	"vivaop/internal/usecases/app/repos/organizationrepo"
 	"vivaop/internal/usecases/app/repos/sessionrepo"
 	"vivaop/internal/usecases/app/repos/userrepo"
 	"vivaop/internal/util"
@@ -38,7 +39,10 @@ func main() {
 	cs := countryrepo.NewCountries(store)
 	us := userrepo.NewUsers(store)
 	ss := sessionrepo.NewSession(store)
-	hs := handlers.NewHandlers(us, cs, ss)
+	osstore := organizationrepo.NewOrganizationStore(store)
+
+	hs := handlers.NewHandlers(us, cs, ss, osstore)
+
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey) // config.TokenSymmetricKey
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create token maker")

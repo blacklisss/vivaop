@@ -5,6 +5,7 @@ import (
 	"vivaop/internal/infrastructure/token"
 	"vivaop/internal/util"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,6 +31,12 @@ func NewRouterGin(config *util.Config, hs *handlers.Handlers, tokenMaker token.M
 }
 
 func (router *RouterGin) setupRouter(r *gin.Engine) {
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+
+	r.Use(cors.New(config))
+
 	r.POST("/countries", router.CreateCountry)
 	r.GET("/countries", router.ShowCountries)
 
@@ -39,14 +46,12 @@ func (router *RouterGin) setupRouter(r *gin.Engine) {
 
 	authRoutes := r.Group("/").Use(authMiddleware(router.tokenMaker))
 	authRoutes.POST("/organizations/create", router.CreateOrganization)
-	/*
+	authRoutes.GET("/organizations/:id", router.GetOrganization)
+	authRoutes.POST("/organizations/:id", router.UpdateOrganization)
+	authRoutes.DELETE("/organizations/:id", router.DeleteOrganization)
+	authRoutes.GET("/organizations/my", router.ListMyOrganization)
+	authRoutes.GET("/organizations/verify/:id", router.VerifyOrganization)
 
-		authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
-		authRoutes.POST("/accounts", server.createAccount)
-		authRoutes.GET("/accounts/:id", server.getAccount)
-		authRoutes.GET("/accounts", server.listAccounts)
-
-		authRoutes.POST("/transfers", server.createTransfer)*/
 }
 
 func errorResponse(err error) gin.H {
