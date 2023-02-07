@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"strconv"
+	"time"
 	"vivaop/internal/infrastructure/token"
 	"vivaop/internal/usecases/app/repos/organizationrepo"
 
@@ -14,8 +15,8 @@ import (
 type createOrganizationParams struct {
 	Name             string `json:"name" binding:"required"`
 	CountryID        string `json:"country_id" binding:"required"`
-	RegistartionCode string `json:"registartion_code" binding:"required"`
-	RegistartionDate string `json:"registartion_date" binding:"required"`
+	RegistrationCode string `json:"registration_code" binding:"required"`
+	RegistrationDate string `json:"registration_date" binding:"required"`
 }
 
 func (router *RouterGin) CreateOrganization(ctx *gin.Context) {
@@ -39,11 +40,23 @@ func (router *RouterGin) CreateOrganization(ctx *gin.Context) {
 		return
 	}
 
+	registartionDate, err := time.Parse(time.RFC3339, req.RegistrationDate)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 	organization, err := router.hs.CreateOrganization(ctx, &organizationrepo.CreateOrganizationParams{
 		ID:        id,
 		Name:      req.Name,
 		CountryID: int32(c_id),
 		OwnerID:   authPayload.ID,
+		Verified: sql.NullBool{
+			Bool:  false,
+			Valid: true,
+		},
+		RegistrationCode: req.RegistrationCode,
+		RegistrationDate: registartionDate,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -68,6 +81,31 @@ func (router *RouterGin) GetOrganization(ctx *gin.Context) {
 	id := uuid.MustParse(req.ID)
 
 	organization, err := router.hs.GetOrganization(ctx, id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, organization)
+}
+
+func (router *RouterGin) GetOrganizationByOwner(ctx *gin.Context) {
+	var req getOrganizationParams
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	// Organization ID
+	id := uuid.MustParse(req.ID)
+
+	// Getting User ID
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	organization, err := router.hs.GetOrganizationByOwner(ctx, &organizationrepo.GetOrganizationByOwnerParams{
+		ID:      id,
+		OwnerID: authPayload.ID,
+	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

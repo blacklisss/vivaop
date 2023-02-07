@@ -46,7 +46,7 @@ func (router *RouterGin) setupRouter(r *gin.Engine) {
 
 	authRoutes := r.Group("/").Use(authMiddleware(router.tokenMaker))
 	authRoutes.POST("/organizations/create", router.CreateOrganization)
-	authRoutes.GET("/organizations/:id", router.GetOrganization)
+	authRoutes.GET("/organizations/:id", router.GetOrganizationByOwner)
 	authRoutes.POST("/organizations/:id", router.UpdateOrganization)
 	authRoutes.DELETE("/organizations/:id", router.DeleteOrganization)
 	authRoutes.GET("/organizations/my", router.ListMyOrganization)

@@ -54,3 +54,10 @@ SET deleted_at = NOW()
 WHERE id = $1
   AND deleted_at IS NULL
 RETURNING *;
+
+-- name: AddRegistrationImage :one
+UPDATE organizations
+SET registrtion_image = $1,
+    updated_at        = NOW()
+WHERE id = $1
+RETURNING *;

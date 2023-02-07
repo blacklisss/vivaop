@@ -30,8 +30,8 @@ CREATE TABLE "organizations" (
   "owner_id" uuid NOT NULL,
   "registration_code" varchar UNIQUE NOT NULL,
   "registration_date" timestamp NOT NULL,
-  "registartion_image" varchar,
-  "verified" bool DEFAULT false,
+  "registration_image" varchar,
+  "verified" bool NOT NULL DEFAULT false,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz,
   "deleted_at" timestamptz

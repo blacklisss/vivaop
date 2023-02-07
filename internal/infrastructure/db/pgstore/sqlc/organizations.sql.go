@@ -19,9 +19,11 @@ INSERT INTO organizations
  name,
  country_id,
  owner_id,
- verified)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, name, country_id, owner_id, verified, created_at, updated_at, deleted_at
+ verified,
+ registration_code,
+ registration_date)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, name, country_id, owner_id, registration_code, registration_date, registration_image, verified, created_at, updated_at, deleted_at
 `
 
 func (q *Queries) CreateOrganization(ctx context.Context, arg *organizationrepo.CreateOrganizationParams) (*organizationentity.Organization, error) {
@@ -31,6 +33,8 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg *organizationrepo.
 		arg.CountryID,
 		arg.OwnerID,
 		arg.Verified,
+		arg.RegistrationCode,
+		arg.RegistrationDate,
 	)
 	var i Organization
 	err := row.Scan(
@@ -38,18 +42,24 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg *organizationrepo.
 		&i.Name,
 		&i.CountryID,
 		&i.OwnerID,
+		&i.RegistrationCode,
+		&i.RegistrationDate,
+		&i.RegistrationImage,
 		&i.Verified,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:        i.ID,
-		Name:      i.Name,
-		CountryID: i.CountryID,
-		OwnerID:   i.OwnerID,
-		Verified:  i.Verified.Bool,
-		CreatedAt: i.CreatedAt,
+		ID:               i.ID,
+		Name:             i.Name,
+		CountryID:        i.CountryID,
+		OwnerID:          i.OwnerID,
+		Verified:         i.Verified.Bool,
+		RegistrationCode: i.RegistrationCode,
+		RegistrationDate: i.RegistrationDate,
+		RegistrationImage: i.RegistrationImage.String,
+		CreatedAt:        i.CreatedAt,
 	}, err
 }
 
@@ -57,7 +67,7 @@ const deleteOrganization = `-- name: DeleteOrganization :one
 UPDATE organizations
 SET deleted_at = NOW()
 WHERE id = $1 AND deleted_at IS NULL
-RETURNING id, name, country_id, owner_id, verified, created_at, updated_at, deleted_at
+RETURNING id, name, country_id, owner_id, verified, registration_code, registration_date, registration_image, created_at, updated_at, deleted_at
 `
 
 func (q *Queries) DeleteOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error) {
@@ -69,24 +79,30 @@ func (q *Queries) DeleteOrganization(ctx context.Context, id uuid.UUID) (*organi
 		&i.CountryID,
 		&i.OwnerID,
 		&i.Verified,
+		&i.RegistrationCode,
+		&i.RegistrationDate,
+		&i.RegistrationImage,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:        i.ID,
-		Name:      i.Name,
-		CountryID: i.CountryID,
-		OwnerID:   i.OwnerID,
-		Verified:  i.Verified.Bool,
-		CreatedAt: i.CreatedAt,
-		UpdatedAt: i.UpdatedAt.Time,
-		DeletedAt: i.DeletedAt.Time,
+		ID:               i.ID,
+		Name:             i.Name,
+		CountryID:        i.CountryID,
+		OwnerID:          i.OwnerID,
+		Verified:         i.Verified.Bool,
+		RegistrationCode: i.RegistrationCode,
+		RegistrationDate: i.RegistrationDate,
+		RegistrationImage: i.RegistrationImage.String,
+		CreatedAt:        i.CreatedAt,
+		UpdatedAt:        i.UpdatedAt.Time,
+		DeletedAt:        i.DeletedAt.Time,
 	}, err
 }
 
 const getOrganization = `-- name: GetOrganization :one
-SELECT id, name, country_id, owner_id, verified, created_at, updated_at, deleted_at
+SELECT id, name, country_id, owner_id, verified, registration_code, registration_date, registration_image, created_at, updated_at, deleted_at
 FROM organizations
 WHERE id = $1
 LIMIT 1
@@ -101,24 +117,30 @@ func (q *Queries) GetOrganization(ctx context.Context, id uuid.UUID) (*organizat
 		&i.CountryID,
 		&i.OwnerID,
 		&i.Verified,
+		&i.RegistrationCode,
+		&i.RegistrationDate,
+		&i.RegistrationImage,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:        i.ID,
-		Name:      i.Name,
-		CountryID: i.CountryID,
-		OwnerID:   i.OwnerID,
-		Verified:  i.Verified.Bool,
-		CreatedAt: i.CreatedAt,
-		UpdatedAt: i.UpdatedAt.Time,
-		DeletedAt: i.DeletedAt.Time,
+		ID:               i.ID,
+		Name:             i.Name,
+		CountryID:        i.CountryID,
+		OwnerID:          i.OwnerID,
+		Verified:         i.Verified.Bool,
+		RegistrationCode: i.RegistrationCode,
+		RegistrationDate: i.RegistrationDate,
+		RegistrationImage: i.RegistrationImage.String,
+		CreatedAt:        i.CreatedAt,
+		UpdatedAt:        i.UpdatedAt.Time,
+		DeletedAt:        i.DeletedAt.Time,
 	}, err
 }
 
 const getOrganizationByOwner = `-- name: GetOrganizationByOwner :one
-SELECT id, name, country_id, owner_id, verified, created_at, updated_at, deleted_at
+SELECT id, name, country_id, owner_id, verified, registration_code, registration_date, registration_image, created_at, updated_at, deleted_at
 FROM organizations
 WHERE id = $1
   AND owner_id = $2
@@ -134,24 +156,30 @@ func (q *Queries) GetOrganizationByOwner(ctx context.Context, arg *organizationr
 		&i.CountryID,
 		&i.OwnerID,
 		&i.Verified,
+		&i.RegistrationCode,
+		&i.RegistrationDate,
+		&i.RegistrationImage,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:        i.ID,
-		Name:      i.Name,
-		CountryID: i.CountryID,
-		OwnerID:   i.OwnerID,
-		Verified:  i.Verified.Bool,
-		CreatedAt: i.CreatedAt,
-		UpdatedAt: i.UpdatedAt.Time,
-		DeletedAt: i.DeletedAt.Time,
+		ID:               i.ID,
+		Name:             i.Name,
+		CountryID:        i.CountryID,
+		OwnerID:          i.OwnerID,
+		Verified:         i.Verified.Bool,
+		RegistrationCode: i.RegistrationCode,
+		RegistrationDate: i.RegistrationDate,
+		RegistrationImage: i.RegistrationImage.String,
+		CreatedAt:        i.CreatedAt,
+		UpdatedAt:        i.UpdatedAt.Time,
+		DeletedAt:        i.DeletedAt.Time,
 	}, err
 }
 
 const listOwnerOrganization = `-- name: ListOwnerOrganization :many
-SELECT id, name, country_id, owner_id, verified, created_at, updated_at, deleted_at
+SELECT id, name, country_id, owner_id, verified, registration_code, registration_date, registration_image, created_at, updated_at, deleted_at
 FROM organizations
 WHERE owner_id = $1 AND deleted_at IS NULL
 `
@@ -171,6 +199,9 @@ func (q *Queries) ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID) 
 			&i.CountryID,
 			&i.OwnerID,
 			&i.Verified,
+			&i.RegistrationCode,
+			&i.RegistrationDate,
+			&i.RegistrationImage,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -178,14 +209,17 @@ func (q *Queries) ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID) 
 			return nil, err
 		}
 		org := &organizationentity.Organization{
-			ID:        i.ID,
-			Name:      i.Name,
-			CountryID: i.CountryID,
-			OwnerID:   i.OwnerID,
-			Verified:  i.Verified.Bool,
-			CreatedAt: i.CreatedAt,
-			UpdatedAt: i.UpdatedAt.Time,
-			DeletedAt: i.DeletedAt.Time,
+			ID:                i.ID,
+			Name:              i.Name,
+			CountryID:         i.CountryID,
+			OwnerID:           i.OwnerID,
+			Verified:          i.Verified.Bool,
+			RegistrationCode:  i.RegistrationCode,
+			RegistrationDate:  i.RegistrationDate,
+			RegistrationImage: i.RegistrationImage.String,
+			CreatedAt:         i.CreatedAt,
+			UpdatedAt:         i.UpdatedAt.Time,
+			DeletedAt:         i.DeletedAt.Time,
 		}
 		items = append(items, org)
 	}
@@ -216,6 +250,8 @@ func (q *Queries) UpdateOrganization(ctx context.Context, arg *organizationrepo.
 		arg.CountryID,
 		arg.OwnerID,
 		arg.Verified,
+		arg.RegistrationCode,
+		arg.RegistrationDate,
 	)
 	var i Organization
 	err := row.Scan(
@@ -223,20 +259,26 @@ func (q *Queries) UpdateOrganization(ctx context.Context, arg *organizationrepo.
 		&i.Name,
 		&i.CountryID,
 		&i.OwnerID,
+		&i.RegistrationCode,
+		&i.RegistrationDate,
+		&i.RegistrationImage,
 		&i.Verified,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:        i.ID,
-		Name:      i.Name,
-		CountryID: i.CountryID,
-		OwnerID:   i.OwnerID,
-		Verified:  i.Verified.Bool,
-		CreatedAt: i.CreatedAt,
-		UpdatedAt: i.UpdatedAt.Time,
-		DeletedAt: i.DeletedAt.Time,
+		ID:               i.ID,
+		Name:             i.Name,
+		CountryID:        i.CountryID,
+		OwnerID:          i.OwnerID,
+		Verified:         i.Verified.Bool,
+		RegistrationCode: i.RegistrationCode,
+		RegistrationDate: i.RegistrationDate,
+		RegistrationImage: i.RegistrationImage.String,
+		CreatedAt:        i.CreatedAt,
+		UpdatedAt:        i.UpdatedAt.Time,
+		DeletedAt:        i.DeletedAt.Time,
 	}, err
 }
 
@@ -256,19 +298,25 @@ func (q *Queries) VerifyOrganization(ctx context.Context, orgID uuid.UUID) (*org
 		&i.Name,
 		&i.CountryID,
 		&i.OwnerID,
+		&i.RegistrationCode,
+		&i.RegistrationDate,
+		&i.RegistrationImage,
 		&i.Verified,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:        i.ID,
-		Name:      i.Name,
-		CountryID: i.CountryID,
-		OwnerID:   i.OwnerID,
-		Verified:  i.Verified.Bool,
-		CreatedAt: i.CreatedAt,
-		UpdatedAt: i.UpdatedAt.Time,
-		DeletedAt: i.DeletedAt.Time,
+		ID:               i.ID,
+		Name:             i.Name,
+		CountryID:        i.CountryID,
+		OwnerID:          i.OwnerID,
+		Verified:         i.Verified.Bool,
+		RegistrationCode: i.RegistrationCode,
+		RegistrationDate: i.RegistrationDate,
+		RegistrationImage: i.RegistrationImage.String,
+		CreatedAt:        i.CreatedAt,
+		UpdatedAt:        i.UpdatedAt.Time,
+		DeletedAt:        i.DeletedAt.Time,
 	}, err
 }
