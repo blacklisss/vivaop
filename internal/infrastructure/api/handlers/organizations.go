@@ -52,16 +52,17 @@ func (rt *Handlers) GetOrganization(ctx context.Context, id uuid.UUID) (*Organiz
 	}
 
 	return &Organization{
-		ID:               o.ID,
-		Name:             o.Name,
-		CountryID:        o.CountryID,
-		OwnerID:          o.OwnerID,
-		Verified:         o.Verified,
-		RegistrationCode: o.RegistrationCode,
-		RegistrationDate: o.RegistrationDate,
-		CreatedAt:        o.CreatedAt,
-		UpdatedAt:        o.UpdatedAt,
-		DeletedAt:        o.DeletedAt,
+		ID:                o.ID,
+		Name:              o.Name,
+		CountryID:         o.CountryID,
+		OwnerID:           o.OwnerID,
+		Verified:          o.Verified,
+		RegistrationCode:  o.RegistrationCode,
+		RegistrationDate:  o.RegistrationDate,
+		RegistrationImage: o.RegistrationImage,
+		CreatedAt:         o.CreatedAt,
+		UpdatedAt:         o.UpdatedAt,
+		DeletedAt:         o.DeletedAt,
 	}, nil
 }
 
@@ -103,16 +104,17 @@ func (rt *Handlers) UpdateOrganization(ctx context.Context, params *organization
 	}
 
 	return &Organization{
-		ID:               o.ID,
-		Name:             o.Name,
-		CountryID:        o.CountryID,
-		OwnerID:          o.OwnerID,
-		Verified:         o.Verified,
-		RegistrationCode: o.RegistrationCode,
-		RegistrationDate: o.RegistrationDate,
-		CreatedAt:        o.CreatedAt,
-		UpdatedAt:        o.UpdatedAt,
-		DeletedAt:        o.DeletedAt,
+		ID:                o.ID,
+		Name:              o.Name,
+		CountryID:         o.CountryID,
+		OwnerID:           o.OwnerID,
+		Verified:          o.Verified,
+		RegistrationCode:  o.RegistrationCode,
+		RegistrationDate:  o.RegistrationDate,
+		RegistrationImage: o.RegistrationImage,
+		CreatedAt:         o.CreatedAt,
+		UpdatedAt:         o.UpdatedAt,
+		DeletedAt:         o.DeletedAt,
 	}, nil
 }
 
@@ -123,16 +125,17 @@ func (rt *Handlers) DeleteOrganization(ctx context.Context, id uuid.UUID) (*Orga
 	}
 
 	return &Organization{
-		ID:               o.ID,
-		Name:             o.Name,
-		CountryID:        o.CountryID,
-		OwnerID:          o.OwnerID,
-		Verified:         o.Verified,
-		RegistrationCode: o.RegistrationCode,
-		RegistrationDate: o.RegistrationDate,
-		CreatedAt:        o.CreatedAt,
-		UpdatedAt:        o.UpdatedAt,
-		DeletedAt:        o.DeletedAt,
+		ID:                o.ID,
+		Name:              o.Name,
+		CountryID:         o.CountryID,
+		OwnerID:           o.OwnerID,
+		Verified:          o.Verified,
+		RegistrationCode:  o.RegistrationCode,
+		RegistrationDate:  o.RegistrationDate,
+		RegistrationImage: o.RegistrationImage,
+		CreatedAt:         o.CreatedAt,
+		UpdatedAt:         o.UpdatedAt,
+		DeletedAt:         o.DeletedAt,
 	}, nil
 }
 
@@ -143,15 +146,37 @@ func (rt *Handlers) VerifyOrganization(ctx context.Context, id uuid.UUID) (*Orga
 	}
 
 	return &Organization{
-		ID:               o.ID,
-		Name:             o.Name,
-		CountryID:        o.CountryID,
-		OwnerID:          o.OwnerID,
-		Verified:         o.Verified,
-		RegistrationCode: o.RegistrationCode,
-		RegistrationDate: o.RegistrationDate,
-		CreatedAt:        o.CreatedAt,
-		UpdatedAt:        o.UpdatedAt,
-		DeletedAt:        o.DeletedAt,
+		ID:                o.ID,
+		Name:              o.Name,
+		CountryID:         o.CountryID,
+		OwnerID:           o.OwnerID,
+		Verified:          o.Verified,
+		RegistrationCode:  o.RegistrationCode,
+		RegistrationDate:  o.RegistrationDate,
+		RegistrationImage: o.RegistrationImage,
+		CreatedAt:         o.CreatedAt,
+		UpdatedAt:         o.UpdatedAt,
+		DeletedAt:         o.DeletedAt,
+	}, nil
+}
+
+func (rt *Handlers) UploadRegistration(ctx context.Context, params *organizationrepo.UploadOrganizationParams) (*Organization, error) {
+	o, err := rt.os.AddRegistrationImage(ctx, params)
+	if err != nil {
+		return &Organization{}, fmt.Errorf("error when updating organization registartion: %w", err)
+	}
+
+	return &Organization{
+		ID:                o.ID,
+		Name:              o.Name,
+		CountryID:         o.CountryID,
+		OwnerID:           o.OwnerID,
+		Verified:          o.Verified,
+		RegistrationCode:  o.RegistrationCode,
+		RegistrationDate:  o.RegistrationDate,
+		RegistrationImage: o.RegistrationImage,
+		CreatedAt:         o.CreatedAt,
+		UpdatedAt:         o.UpdatedAt,
+		DeletedAt:         o.DeletedAt,
 	}, nil
 }

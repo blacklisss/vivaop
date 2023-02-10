@@ -57,7 +57,13 @@ RETURNING *;
 
 -- name: AddRegistrationImage :one
 UPDATE organizations
-SET registrtion_image = $1,
+SET registration_image = $1,
     updated_at        = NOW()
-WHERE id = $1
+WHERE id = $2
 RETURNING *;
+
+-- name: SearchOrganization :many
+SELECT *
+FROM organizations
+WHERE name LIKE '%$1%'
+  AND deleted_at IS NULL;

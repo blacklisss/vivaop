@@ -37,6 +37,8 @@ func (router *RouterGin) setupRouter(r *gin.Engine) {
 
 	r.Use(cors.New(config))
 
+	r.MaxMultipartMemory = 8 << 20 // 8 MiB
+
 	r.POST("/countries", router.CreateCountry)
 	r.GET("/countries", router.ShowCountries)
 
@@ -51,6 +53,7 @@ func (router *RouterGin) setupRouter(r *gin.Engine) {
 	authRoutes.DELETE("/organizations/:id", router.DeleteOrganization)
 	authRoutes.GET("/organizations/my", router.ListMyOrganization)
 	authRoutes.GET("/organizations/verify/:id", router.VerifyOrganization)
+	authRoutes.POST("/organizations/upload", router.UploadRegistration)
 
 }
 

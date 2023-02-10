@@ -35,13 +35,20 @@ type UpdateOrganizationParams struct {
 	Verified         sql.NullBool `json:"verified"`
 }
 
+type UploadOrganizationParams struct {
+	ID        uuid.UUID
+	UploadURL string
+}
+
 type OrganizationStore interface {
+	AddRegistrationImage(ctx context.Context, params *UploadOrganizationParams) (*organizationentity.Organization, error)
 	CreateOrganization(ctx context.Context, params *CreateOrganizationParams) (*organizationentity.Organization, error)
 	GetOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
 	GetOrganizationByOwner(ctx context.Context, params *GetOrganizationByOwnerParams) (*organizationentity.Organization, error)
 	ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID) ([]*organizationentity.Organization, error)
 	UpdateOrganization(ctx context.Context, params *UpdateOrganizationParams) (*organizationentity.Organization, error)
 	DeleteOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
+	SearchOrganizations(ctx context.Context, query string) ([]*organizationentity.Organization, error)
 	VerifyOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
 }
 
@@ -116,4 +123,22 @@ func (os *Organizations) VerifyOrganization(ctx context.Context, id uuid.UUID) (
 	}
 
 	return organization, nil
+}
+
+func (os *Organizations) AddRegistrationImage(ctx context.Context, params *UploadOrganizationParams) (*organizationentity.Organization, error) {
+	organization, err := os.ostore.AddRegistrationImage(ctx, params)
+	if err != nil {
+		return nil, fmt.Errorf("upload organization registration error: %w", err)
+	}
+
+	return organization, nil
+}
+
+func (os *Organizations) SearchOrganizations(ctx context.Context, query string) ([]*organizationentity.Organization, error) {
+	organizations, err := os.ostore.SearchOrganizations(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("list organization error: %w", err)
+	}
+
+	return organizations, nil
 }

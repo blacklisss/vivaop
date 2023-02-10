@@ -27,9 +27,9 @@ type Organization struct {
 	CountryID         int32          `json:"country_id"`
 	OwnerID           uuid.UUID      `json:"owner_id"`
 	RegistrationCode  string         `json:"registration_code"`
-	RegistrationImage sql.NullString `json:"registration_image"`
 	RegistrationDate  time.Time      `json:"registration_date"`
-	Verified          sql.NullBool   `json:"verified"`
+	RegistrationImage sql.NullString `json:"registration_image"`
+	Verified          bool           `json:"verified"`
 	CreatedAt         time.Time      `json:"created_at"`
 	UpdatedAt         sql.NullTime   `json:"updated_at"`
 	DeletedAt         sql.NullTime   `json:"deleted_at"`

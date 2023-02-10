@@ -2,11 +2,15 @@ package routergin
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 	"vivaop/internal/infrastructure/token"
 	"vivaop/internal/usecases/app/repos/organizationrepo"
+	"vivaop/internal/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -119,9 +123,13 @@ type updateOrganizationIDParams struct {
 }
 
 type updateOrganizationParams struct {
-	Name      string `json:"name" binding:"required"`
-	CountryID int32  `json:"country_id" binding:"required"`
-	Verified  bool   `json:"verified"`
+	ID               uuid.UUID `json:"id"  binding:"required"`
+	OwnerID          uuid.UUID `json:"owner_id" binding:"required"`
+	CountryID        int32     `json:"country_id" binding:"required"`
+	Verified         bool      `json:"verified"`
+	Name             string    `json:"name" binding:"required"`
+	RegistrationCode string    `json:"registration_code" binding:"required"`
+	RegistrationDate string    `json:"registration_date" binding:"required"`
 }
 
 func (router *RouterGin) UpdateOrganization(ctx *gin.Context) {
@@ -210,6 +218,80 @@ func (router *RouterGin) VerifyOrganization(ctx *gin.Context) {
 	id := uuid.MustParse(req.ID)
 
 	organization, err := router.hs.VerifyOrganization(ctx, id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, organization)
+}
+
+type uploadOrganizationParams struct {
+	ID               string `form:"id"  binding:"required"`
+	OwnerID          string `form:"owner_id" binding:"required"`
+	CountryID        string `form:"country_id" binding:"required"`
+	Name             string `form:"name" binding:"required"`
+	RegistrationCode string `form:"registration_code" binding:"required"`
+	RegistrationDate string `form:"registration_date" binding:"required"`
+}
+
+func (router *RouterGin) UploadRegistration(ctx *gin.Context) {
+	var req uploadOrganizationParams
+	if err := ctx.Bind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	file, err := ctx.FormFile("registration_image")
+	if err != nil {
+		if err.Error() == "http: no such file" {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if req.OwnerID != authPayload.ID.String() {
+		ctx.JSON(http.StatusForbidden, errorResponse(fmt.Errorf("%s", "not your organization")))
+		return
+	}
+
+	ownerArr := strings.Split(req.OwnerID, "-")
+	tmpPath := strings.Replace(req.ID, "-", "", -1)
+
+	uploadPath := router.config.UploadRegPath + string(os.PathSeparator) + ownerArr[0][:2] + string(os.PathSeparator) + ownerArr[0][2:4] + string(os.PathSeparator) + ownerArr[0][4:6] + string(os.PathSeparator) + tmpPath + string(os.PathSeparator)
+
+	ok, err := util.DirExists(uploadPath)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	if !ok {
+		err = util.MakeDir(uploadPath)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+	}
+
+	uploadPath += file.Filename
+	uploadURL := router.config.UploadRegURL + string(os.PathSeparator) + ownerArr[0][:2] + string(os.PathSeparator) + ownerArr[0][2:4] + string(os.PathSeparator) + ownerArr[0][4:6] + string(os.PathSeparator) + tmpPath + string(os.PathSeparator) + file.Filename
+
+	err = ctx.SaveUploadedFile(file, uploadPath)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	id := uuid.MustParse(req.ID)
+
+	organization, err := router.hs.UploadRegistration(ctx, &organizationrepo.UploadOrganizationParams{
+		ID:        id,
+		UploadURL: uploadURL,
+	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

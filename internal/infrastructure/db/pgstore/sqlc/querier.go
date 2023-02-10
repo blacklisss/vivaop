@@ -19,6 +19,7 @@ import (
 )
 
 type Querier interface {
+	AddRegistrationImage(ctx context.Context, params *organizationrepo.UploadOrganizationParams) (*organizationentity.Organization, error)
 	CreateCountry(ctx context.Context, args *countryrepo.CreateCountryParams) (*countryentity.Country, error)
 	CreateOrganization(ctx context.Context, params *organizationrepo.CreateOrganizationParams) (*organizationentity.Organization, error)
 	CreateSession(ctx context.Context, arg *sessionrepo.CreateSessionParams) (*sessionentity.Session, error)

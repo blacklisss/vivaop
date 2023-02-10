@@ -13,6 +13,45 @@ import (
 	"github.com/google/uuid"
 )
 
+const addRegistrationImage = `-- name: AddRegistrationImage :one
+UPDATE organizations
+SET registration_image = $1,
+    updated_at        = NOW()
+WHERE id = $2
+RETURNING id, name, country_id, owner_id, registration_code, registration_date, registration_image, verified, created_at, updated_at, deleted_at
+`
+
+func (q *Queries) AddRegistrationImage(ctx context.Context, params *organizationrepo.UploadOrganizationParams) (*organizationentity.Organization, error) {
+	row := q.db.QueryRowContext(ctx, addRegistrationImage, params.UploadURL, params.ID)
+	var i Organization
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CountryID,
+		&i.OwnerID,
+		&i.RegistrationCode,
+		&i.RegistrationDate,
+		&i.RegistrationImage,
+		&i.Verified,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return &organizationentity.Organization{
+		ID:                i.ID,
+		Name:              i.Name,
+		CountryID:         i.CountryID,
+		OwnerID:           i.OwnerID,
+		Verified:          i.Verified,
+		RegistrationCode:  i.RegistrationCode,
+		RegistrationDate:  i.RegistrationDate,
+		RegistrationImage: i.RegistrationImage.String,
+		CreatedAt:         i.CreatedAt,
+		UpdatedAt:         i.UpdatedAt.Time,
+		DeletedAt:         i.DeletedAt.Time,
+	}, err
+}
+
 const createOrganization = `-- name: CreateOrganization :one
 INSERT INTO organizations
 (id,
@@ -51,15 +90,15 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg *organizationrepo.
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:               i.ID,
-		Name:             i.Name,
-		CountryID:        i.CountryID,
-		OwnerID:          i.OwnerID,
-		Verified:         i.Verified.Bool,
-		RegistrationCode: i.RegistrationCode,
-		RegistrationDate: i.RegistrationDate,
+		ID:                i.ID,
+		Name:              i.Name,
+		CountryID:         i.CountryID,
+		OwnerID:           i.OwnerID,
+		Verified:          i.Verified,
+		RegistrationCode:  i.RegistrationCode,
+		RegistrationDate:  i.RegistrationDate,
 		RegistrationImage: i.RegistrationImage.String,
-		CreatedAt:        i.CreatedAt,
+		CreatedAt:         i.CreatedAt,
 	}, err
 }
 
@@ -87,17 +126,17 @@ func (q *Queries) DeleteOrganization(ctx context.Context, id uuid.UUID) (*organi
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:               i.ID,
-		Name:             i.Name,
-		CountryID:        i.CountryID,
-		OwnerID:          i.OwnerID,
-		Verified:         i.Verified.Bool,
-		RegistrationCode: i.RegistrationCode,
-		RegistrationDate: i.RegistrationDate,
+		ID:                i.ID,
+		Name:              i.Name,
+		CountryID:         i.CountryID,
+		OwnerID:           i.OwnerID,
+		Verified:          i.Verified,
+		RegistrationCode:  i.RegistrationCode,
+		RegistrationDate:  i.RegistrationDate,
 		RegistrationImage: i.RegistrationImage.String,
-		CreatedAt:        i.CreatedAt,
-		UpdatedAt:        i.UpdatedAt.Time,
-		DeletedAt:        i.DeletedAt.Time,
+		CreatedAt:         i.CreatedAt,
+		UpdatedAt:         i.UpdatedAt.Time,
+		DeletedAt:         i.DeletedAt.Time,
 	}, err
 }
 
@@ -125,17 +164,17 @@ func (q *Queries) GetOrganization(ctx context.Context, id uuid.UUID) (*organizat
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:               i.ID,
-		Name:             i.Name,
-		CountryID:        i.CountryID,
-		OwnerID:          i.OwnerID,
-		Verified:         i.Verified.Bool,
-		RegistrationCode: i.RegistrationCode,
-		RegistrationDate: i.RegistrationDate,
+		ID:                i.ID,
+		Name:              i.Name,
+		CountryID:         i.CountryID,
+		OwnerID:           i.OwnerID,
+		Verified:          i.Verified,
+		RegistrationCode:  i.RegistrationCode,
+		RegistrationDate:  i.RegistrationDate,
 		RegistrationImage: i.RegistrationImage.String,
-		CreatedAt:        i.CreatedAt,
-		UpdatedAt:        i.UpdatedAt.Time,
-		DeletedAt:        i.DeletedAt.Time,
+		CreatedAt:         i.CreatedAt,
+		UpdatedAt:         i.UpdatedAt.Time,
+		DeletedAt:         i.DeletedAt.Time,
 	}, err
 }
 
@@ -164,17 +203,17 @@ func (q *Queries) GetOrganizationByOwner(ctx context.Context, arg *organizationr
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:               i.ID,
-		Name:             i.Name,
-		CountryID:        i.CountryID,
-		OwnerID:          i.OwnerID,
-		Verified:         i.Verified.Bool,
-		RegistrationCode: i.RegistrationCode,
-		RegistrationDate: i.RegistrationDate,
+		ID:                i.ID,
+		Name:              i.Name,
+		CountryID:         i.CountryID,
+		OwnerID:           i.OwnerID,
+		Verified:          i.Verified,
+		RegistrationCode:  i.RegistrationCode,
+		RegistrationDate:  i.RegistrationDate,
 		RegistrationImage: i.RegistrationImage.String,
-		CreatedAt:        i.CreatedAt,
-		UpdatedAt:        i.UpdatedAt.Time,
-		DeletedAt:        i.DeletedAt.Time,
+		CreatedAt:         i.CreatedAt,
+		UpdatedAt:         i.UpdatedAt.Time,
+		DeletedAt:         i.DeletedAt.Time,
 	}, err
 }
 
@@ -213,7 +252,7 @@ func (q *Queries) ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID) 
 			Name:              i.Name,
 			CountryID:         i.CountryID,
 			OwnerID:           i.OwnerID,
-			Verified:          i.Verified.Bool,
+			Verified:          i.Verified,
 			RegistrationCode:  i.RegistrationCode,
 			RegistrationDate:  i.RegistrationDate,
 			RegistrationImage: i.RegistrationImage.String,
@@ -234,13 +273,15 @@ func (q *Queries) ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID) 
 
 const updateOrganization = `-- name: UpdateOrganization :one
 UPDATE organizations
-SET name       = $2,
-    country_id = $3,
-    owner_id   = $4,
-    verified   = $5,
-	updated_at = NOW()
+SET name              = $2,
+    country_id        = $3,
+    owner_id          = $4,
+    verified          = $5,
+    registration_code = $6,
+    registration_date = $7,
+    updated_at        = NOW()
 WHERE id = $1
-RETURNING id, name, country_id, owner_id, verified, created_at, updated_at, deleted_at
+RETURNING id, name, country_id, owner_id, registration_code, registration_date, registration_image, verified, created_at, updated_at, deleted_at
 `
 
 func (q *Queries) UpdateOrganization(ctx context.Context, arg *organizationrepo.UpdateOrganizationParams) (*organizationentity.Organization, error) {
@@ -268,17 +309,17 @@ func (q *Queries) UpdateOrganization(ctx context.Context, arg *organizationrepo.
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:               i.ID,
-		Name:             i.Name,
-		CountryID:        i.CountryID,
-		OwnerID:          i.OwnerID,
-		Verified:         i.Verified.Bool,
-		RegistrationCode: i.RegistrationCode,
-		RegistrationDate: i.RegistrationDate,
+		ID:                i.ID,
+		Name:              i.Name,
+		CountryID:         i.CountryID,
+		OwnerID:           i.OwnerID,
+		Verified:          i.Verified,
+		RegistrationCode:  i.RegistrationCode,
+		RegistrationDate:  i.RegistrationDate,
 		RegistrationImage: i.RegistrationImage.String,
-		CreatedAt:        i.CreatedAt,
-		UpdatedAt:        i.UpdatedAt.Time,
-		DeletedAt:        i.DeletedAt.Time,
+		CreatedAt:         i.CreatedAt,
+		UpdatedAt:         i.UpdatedAt.Time,
+		DeletedAt:         i.DeletedAt.Time,
 	}, err
 }
 
@@ -287,7 +328,7 @@ UPDATE organizations
 SET verified   = true,
 	updated_at = NOW()
 WHERE id = $1
-RETURNING id, name, country_id, owner_id, verified, created_at, updated_at, deleted_at
+RETURNING id, name, country_id, owner_id, registration_code, registration_date, registration_image, verified, created_at, updated_at, deleted_at
 `
 
 func (q *Queries) VerifyOrganization(ctx context.Context, orgID uuid.UUID) (*organizationentity.Organization, error) {
@@ -307,16 +348,16 @@ func (q *Queries) VerifyOrganization(ctx context.Context, orgID uuid.UUID) (*org
 		&i.DeletedAt,
 	)
 	return &organizationentity.Organization{
-		ID:               i.ID,
-		Name:             i.Name,
-		CountryID:        i.CountryID,
-		OwnerID:          i.OwnerID,
-		Verified:         i.Verified.Bool,
-		RegistrationCode: i.RegistrationCode,
-		RegistrationDate: i.RegistrationDate,
+		ID:                i.ID,
+		Name:              i.Name,
+		CountryID:         i.CountryID,
+		OwnerID:           i.OwnerID,
+		Verified:          i.Verified,
+		RegistrationCode:  i.RegistrationCode,
+		RegistrationDate:  i.RegistrationDate,
 		RegistrationImage: i.RegistrationImage.String,
-		CreatedAt:        i.CreatedAt,
-		UpdatedAt:        i.UpdatedAt.Time,
-		DeletedAt:        i.DeletedAt.Time,
+		CreatedAt:         i.CreatedAt,
+		UpdatedAt:         i.UpdatedAt.Time,
+		DeletedAt:         i.DeletedAt.Time,
 	}, err
 }
