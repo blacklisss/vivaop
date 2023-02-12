@@ -83,12 +83,12 @@ func (router *RouterGin) GetOrganization(ctx *gin.Context) {
 	}
 
 	id := uuid.MustParse(req.ID)
-
 	organization, err := router.hs.GetOrganization(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+	fmt.Println(organization)
 
 	ctx.JSON(http.StatusOK, organization)
 }
@@ -195,13 +195,33 @@ func (router *RouterGin) ListMyOrganization(ctx *gin.Context) {
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	organization, err := router.hs.ListOwnerOrganization(ctx, authPayload.ID)
+	organizations, err := router.hs.ListOwnerOrganization(ctx, authPayload.ID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, organization)
+	ctx.JSON(http.StatusOK, organizations)
+}
+
+type searchOrganization struct {
+	Query string `json:"query" binding:"required"`
+}
+
+func (router *RouterGin) SearchOrganizations(ctx *gin.Context) {
+	var req searchOrganization
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	organizations, err := router.hs.SearchOrganizations(ctx, req.Query)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, organizations)
 }
 
 type verifyOrganizationIDParams struct {

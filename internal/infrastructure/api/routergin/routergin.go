@@ -45,6 +45,9 @@ func (router *RouterGin) setupRouter(r *gin.Engine) {
 	r.POST("/users", router.CreateUser)
 	r.POST("/users/login", router.loginUser)
 	r.POST("/tokens/renew_access", router.renewAccessToken)
+	r.POST("/search", router.SearchOrganizations)
+	r.GET("/organization/:id", router.GetOrganization)
+	r.GET("/organizations/verify/:id", router.VerifyOrganization)
 
 	authRoutes := r.Group("/").Use(authMiddleware(router.tokenMaker))
 	authRoutes.POST("/organizations/create", router.CreateOrganization)
@@ -52,7 +55,7 @@ func (router *RouterGin) setupRouter(r *gin.Engine) {
 	authRoutes.POST("/organizations/:id", router.UpdateOrganization)
 	authRoutes.DELETE("/organizations/:id", router.DeleteOrganization)
 	authRoutes.GET("/organizations/my", router.ListMyOrganization)
-	authRoutes.GET("/organizations/verify/:id", router.VerifyOrganization)
+	// authRoutes.GET("/organizations/verify/:id", router.VerifyOrganization)
 	authRoutes.POST("/organizations/upload", router.UploadRegistration)
 
 }

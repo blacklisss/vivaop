@@ -97,6 +97,16 @@ func (rt *Handlers) ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID
 	return o, nil
 }
 
+func (rt *Handlers) SearchOrganizations(ctx context.Context, query string) ([]*organizationentity.Organization, error) {
+	o, err := rt.os.SearchOrganizations(ctx, query)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return nil, fmt.Errorf("error when search organization: %w", err)
+	}
+
+	return o, nil
+}
+
 func (rt *Handlers) UpdateOrganization(ctx context.Context, params *organizationrepo.UpdateOrganizationParams) (*Organization, error) {
 	o, err := rt.os.UpdateOrganization(ctx, params)
 	if err != nil {

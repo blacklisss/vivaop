@@ -65,5 +65,5 @@ RETURNING *;
 -- name: SearchOrganization :many
 SELECT *
 FROM organizations
-WHERE name LIKE '%$1%'
+WHERE name ILIKE $1 AND verified = true
   AND deleted_at IS NULL;

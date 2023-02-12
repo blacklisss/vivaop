@@ -7,6 +7,7 @@ package pgstore
 
 import (
 	"context"
+	"fmt"
 	"vivaop/internal/entities/organizationentity"
 	"vivaop/internal/usecases/app/repos/organizationrepo"
 
@@ -241,6 +242,61 @@ func (q *Queries) ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID) 
 			&i.RegistrationCode,
 			&i.RegistrationDate,
 			&i.RegistrationImage,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		org := &organizationentity.Organization{
+			ID:                i.ID,
+			Name:              i.Name,
+			CountryID:         i.CountryID,
+			OwnerID:           i.OwnerID,
+			Verified:          i.Verified,
+			RegistrationCode:  i.RegistrationCode,
+			RegistrationDate:  i.RegistrationDate,
+			RegistrationImage: i.RegistrationImage.String,
+			CreatedAt:         i.CreatedAt,
+			UpdatedAt:         i.UpdatedAt.Time,
+			DeletedAt:         i.DeletedAt.Time,
+		}
+		items = append(items, org)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchOrganization = `-- name: SearchOrganization :many
+SELECT id, name, country_id, owner_id, registration_code, registration_date, registration_image, verified, created_at, updated_at, deleted_at
+FROM organizations
+WHERE name ILIKE $1  AND verified = true
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) SearchOrganizations(ctx context.Context, query string) ([]*organizationentity.Organization, error) {
+	rows, err := q.db.QueryContext(ctx, searchOrganization, fmt.Sprintf("%%%s%%", query))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*organizationentity.Organization{}
+	for rows.Next() {
+		var i Organization
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CountryID,
+			&i.OwnerID,
+			&i.RegistrationCode,
+			&i.RegistrationDate,
+			&i.RegistrationImage,
+			&i.Verified,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,

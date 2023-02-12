@@ -37,6 +37,7 @@ type Querier interface {
 	GetUserByPhone(ctx context.Context, phone string) (*userentity.User, error)
 	ListCountries(ctx context.Context) ([]*countryentity.Country, error)
 	ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID) ([]*organizationentity.Organization, error)
+	SearchOrganizations(ctx context.Context, query string) ([]*organizationentity.Organization, error)
 	UpdateCountry(ctx context.Context, arg UpdateCountryParams) (Country, error)
 	UpdateOrganization(ctx context.Context, arg *organizationrepo.UpdateOrganizationParams) (*organizationentity.Organization, error)
 	VerifyOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
