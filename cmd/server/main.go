@@ -11,6 +11,7 @@ import (
 	srv "vivaop/internal/infrastructure/server"
 	"vivaop/internal/infrastructure/token"
 	"vivaop/internal/usecases/app/repos/countryrepo"
+	"vivaop/internal/usecases/app/repos/organization_contact_repo"
 	"vivaop/internal/usecases/app/repos/organizationrepo"
 	"vivaop/internal/usecases/app/repos/sessionrepo"
 	"vivaop/internal/usecases/app/repos/userrepo"
@@ -40,8 +41,9 @@ func main() {
 	us := userrepo.NewUsers(store)
 	ss := sessionrepo.NewSession(store)
 	osstore := organizationrepo.NewOrganizationStore(store)
+	ocstore := organization_contact_repo.NewOrganizationContactsStore(store)
 
-	hs := handlers.NewHandlers(us, cs, ss, osstore)
+	hs := handlers.NewHandlers(us, cs, ss, osstore, ocstore)
 
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey) // config.TokenSymmetricKey
 	if err != nil {

@@ -397,7 +397,7 @@ func (q *Queries) VerifyOrganization(ctx context.Context, orgID uuid.UUID) (*org
 		&i.OwnerID,
 		&i.RegistrationCode,
 		&i.RegistrationDate,
-		&i.RegistrationImage,
+		&i.RegistrationImage.String,
 		&i.Verified,
 		&i.CreatedAt,
 		&i.UpdatedAt,

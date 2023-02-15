@@ -53,10 +53,14 @@ func (router *RouterGin) setupRouter(r *gin.Engine) {
 	authRoutes.POST("/organizations/create", router.CreateOrganization)
 	authRoutes.GET("/organizations/:id", router.GetOrganizationByOwner)
 	authRoutes.POST("/organizations/:id", router.UpdateOrganization)
-	authRoutes.DELETE("/organizations/:id", router.DeleteOrganization)
+	authRoutes.DELETE("/organizations/delete/:id", router.DeleteOrganization)
 	authRoutes.GET("/organizations/my", router.ListMyOrganization)
 	// authRoutes.GET("/organizations/verify/:id", router.VerifyOrganization)
 	authRoutes.POST("/organizations/upload", router.UploadRegistration)
+	authRoutes.POST("/organizations/contact", router.CreateOrganizationContact)
+	authRoutes.GET("/organizations/contact/:id", router.GetOrganizationContact)
+	authRoutes.GET("/organizations/contact/list/:id", router.ListOrganizationContact)
+	authRoutes.DELETE("/organizations/contact/:id", router.DeleteOrganizationContact)
 
 }
 

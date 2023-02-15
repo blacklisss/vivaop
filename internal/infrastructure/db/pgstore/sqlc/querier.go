@@ -7,10 +7,12 @@ package pgstore
 import (
 	"context"
 	"vivaop/internal/entities/countryentity"
+	"vivaop/internal/entities/organization_contact_entity"
 	"vivaop/internal/entities/organizationentity"
 	"vivaop/internal/entities/sessionentity"
 	"vivaop/internal/entities/userentity"
 	"vivaop/internal/usecases/app/repos/countryrepo"
+	"vivaop/internal/usecases/app/repos/organization_contact_repo"
 	"vivaop/internal/usecases/app/repos/organizationrepo"
 	"vivaop/internal/usecases/app/repos/sessionrepo"
 	"vivaop/internal/usecases/app/repos/userrepo"
@@ -22,20 +24,24 @@ type Querier interface {
 	AddRegistrationImage(ctx context.Context, params *organizationrepo.UploadOrganizationParams) (*organizationentity.Organization, error)
 	CreateCountry(ctx context.Context, args *countryrepo.CreateCountryParams) (*countryentity.Country, error)
 	CreateOrganization(ctx context.Context, params *organizationrepo.CreateOrganizationParams) (*organizationentity.Organization, error)
+	CreateOrganizationContact(ctx context.Context, arg *organization_contact_repo.CreateOrganizationContactParams) (*organization_contact_entity.OrganizationContact, error)
 	CreateSession(ctx context.Context, arg *sessionrepo.CreateSessionParams) (*sessionentity.Session, error)
 	CreateUser(ctx context.Context, arg *userrepo.CreateUserParams) (*userentity.User, error)
 	DeleteCountry(ctx context.Context, id int32) error
 	DeleteOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
+	DeleteOrganizationContact(ctx context.Context, id uuid.UUID) (*organization_contact_entity.OrganizationContact, error)
 	DeleteSession(ctx context.Context, id uuid.UUID) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 	GetCountry(ctx context.Context, id int32) (*countryentity.Country, error)
 	GetOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
 	GetOrganizationByOwner(ctx context.Context, params *organizationrepo.GetOrganizationByOwnerParams) (*organizationentity.Organization, error)
+	GetOrganizationContact(ctx context.Context, id uuid.UUID) (*organization_contact_entity.OrganizationContact, error)
 	GetSession(ctx context.Context, userID uuid.UUID) (*sessionentity.Session, error)
 	GetUserByEmail(ctx context.Context, email string) (*userentity.User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (*userentity.User, error)
 	GetUserByPhone(ctx context.Context, phone string) (*userentity.User, error)
 	ListCountries(ctx context.Context) ([]*countryentity.Country, error)
+	ListOrganizationContacts(ctx context.Context, organizationID uuid.UUID) ([]*organization_contact_entity.OrganizationContact, error)
 	ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID) ([]*organizationentity.Organization, error)
 	SearchOrganizations(ctx context.Context, query string) ([]*organizationentity.Organization, error)
 	UpdateCountry(ctx context.Context, arg UpdateCountryParams) (Country, error)

@@ -88,7 +88,6 @@ func (router *RouterGin) GetOrganization(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	fmt.Println(organization)
 
 	ctx.JSON(http.StatusOK, organization)
 }
@@ -181,8 +180,9 @@ func (router *RouterGin) DeleteOrganization(ctx *gin.Context) {
 	}
 
 	id := uuid.MustParse(req.ID)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	organization, err := router.hs.DeleteOrganization(ctx, id)
+	organization, err := router.hs.DeleteOrganization(ctx, id, authPayload.ID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

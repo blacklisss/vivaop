@@ -90,7 +90,6 @@ func (rt *Handlers) GetOrganizationByOwner(ctx context.Context, params *organiza
 func (rt *Handlers) ListOwnerOrganization(ctx context.Context, ownerID uuid.UUID) ([]*organizationentity.Organization, error) {
 	o, err := rt.os.ListOwnerOrganization(ctx, ownerID)
 	if err != nil {
-		fmt.Printf("%v\n", err)
 		return nil, fmt.Errorf("error when getting by owner: %w", err)
 	}
 
@@ -128,7 +127,16 @@ func (rt *Handlers) UpdateOrganization(ctx context.Context, params *organization
 	}, nil
 }
 
-func (rt *Handlers) DeleteOrganization(ctx context.Context, id uuid.UUID) (*Organization, error) {
+func (rt *Handlers) DeleteOrganization(ctx context.Context, id uuid.UUID, userID uuid.UUID) (*Organization, error) {
+	myOrg, err := rt.os.GetOrganization(ctx, id)
+	if err != nil {
+		return &Organization{}, fmt.Errorf("error when updating: %w", err)
+	}
+
+	if myOrg.OwnerID != userID {
+		return &Organization{}, fmt.Errorf("error when deleting organization")
+	}
+
 	o, err := rt.os.DeleteOrganization(ctx, id)
 	if err != nil {
 		return &Organization{}, fmt.Errorf("error when updating: %w", err)

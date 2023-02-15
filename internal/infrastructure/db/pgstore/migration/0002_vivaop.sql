@@ -8,9 +8,18 @@ CREATE TABLE "users" (
   "password" varchar NOT NULL,
   "birthdate" timestamp,
   "country_id" int,
+  "verified_email" bool NOT NULL DEFAULT false,
+  "verified" bool NOT NULL DEFAULT false,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz,
   "deleted_at" timestamptz
+);
+
+CREATE TABLE "verify_email" (
+  "user_id" uuid PRIMARY KEY,
+  "token" varchar NOT NULL,
+  "expired_at" timestamptz NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "countries" (
@@ -32,6 +41,16 @@ CREATE TABLE "organizations" (
   "registration_date" timestamp NOT NULL,
   "registration_image" varchar,
   "verified" bool NOT NULL DEFAULT false,
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "updated_at" timestamptz,
+  "deleted_at" timestamptz
+);
+
+CREATE TABLE "organization_contacts" (
+  "id" uuid PRIMARY KEY,
+  "organization_id" uuid NOT NULL,
+  "name" varchar NOT NULL,
+  "phone" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz,
   "deleted_at" timestamptz
@@ -68,5 +87,7 @@ ALTER TABLE "users" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id")
 ALTER TABLE "organizations" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
 
 ALTER TABLE "organizations" ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
+
+ALTER TABLE "organization_contacts" ADD FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id");
 
 ALTER TABLE "sessions" ADD FOREIGN KEY ("id") REFERENCES "users" ("id");

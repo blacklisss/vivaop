@@ -35,6 +35,16 @@ type Organization struct {
 	DeletedAt         sql.NullTime   `json:"deleted_at"`
 }
 
+type OrganizationContact struct {
+	ID             uuid.UUID    `json:"id"`
+	OrganizationID uuid.UUID    `json:"organization_id"`
+	Name           string       `json:"name"`
+	Phone          string       `json:"phone"`
+	CreatedAt      time.Time    `json:"created_at"`
+	UpdatedAt      sql.NullTime `json:"updated_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
+}
+
 type Session struct {
 	ID           uuid.UUID    `json:"id"`
 	RefreshToken string       `json:"refresh_token"`
