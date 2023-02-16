@@ -2,6 +2,7 @@ package routergin
 
 import (
 	"vivaop/internal/infrastructure/api/handlers"
+	"vivaop/internal/infrastructure/notificator"
 	"vivaop/internal/infrastructure/token"
 	"vivaop/internal/util"
 
@@ -11,12 +12,13 @@ import (
 
 type RouterGin struct {
 	*gin.Engine
-	hs         *handlers.Handlers
-	tokenMaker token.Maker
-	config     *util.Config
+	hs            *handlers.Handlers
+	tokenMaker    token.Maker
+	config        *util.Config
+	notificatorer *notificator.Notificatorer
 }
 
-func NewRouterGin(config *util.Config, hs *handlers.Handlers, tokenMaker token.Maker) (*RouterGin, error) {
+func NewRouterGin(config *util.Config, hs *handlers.Handlers, tokenMaker token.Maker, notificatorer *notificator.Notificatorer) (*RouterGin, error) {
 	r := gin.Default()
 	ret := &RouterGin{
 		hs: hs,
@@ -24,6 +26,7 @@ func NewRouterGin(config *util.Config, hs *handlers.Handlers, tokenMaker token.M
 
 	ret.tokenMaker = tokenMaker
 	ret.config = config
+	ret.notificatorer = notificatorer
 	ret.setupRouter(r)
 
 	ret.Engine = r

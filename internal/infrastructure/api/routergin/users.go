@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 	"vivaop/internal/entities/userentity"
+	"vivaop/internal/infrastructure/notificator"
 	"vivaop/internal/usecases/app/repos/userrepo"
 	"vivaop/internal/util"
 
@@ -120,7 +121,20 @@ func (router *RouterGin) CreateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	fmt.Println(emailVerification)
+
+	err = router.notificatorer.Notificator.Send(ctx, &notificator.EmailData{
+		Token:   emailVerification.Token,
+		To:      user.Email,
+		Subject: "Email Verification Link",
+		Name:    fmt.Sprintf("%s %s %s", user.FName, user.MName, user.LName),
+		Host:    router.config.HTTPServerAddress,
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 	resp := newUserResponse(user)
 	ctx.JSON(http.StatusOK, resp)
 }

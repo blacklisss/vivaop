@@ -8,6 +8,7 @@ import (
 	"vivaop/internal/infrastructure/api/handlers"
 	"vivaop/internal/infrastructure/api/routergin"
 	pgstore "vivaop/internal/infrastructure/db/pgstore/sqlc"
+	"vivaop/internal/infrastructure/notificator"
 	srv "vivaop/internal/infrastructure/server"
 	"vivaop/internal/infrastructure/token"
 	"vivaop/internal/usecases/app/repos/countryrepo"
@@ -50,7 +51,17 @@ func main() {
 		log.Fatal().Err(err).Msg("cannot create token maker")
 	}
 
-	router, err := routergin.NewRouterGin(&config, hs, tokenMaker)
+	emailNotificatorer := notificator.NewEmailNotificator(
+		config.SMTPPort,
+		config.SMTPHost,
+		config.SMTPPass,
+		config.SMTPUser,
+		config.EmailFrom,
+	)
+
+	notificatorer := notificator.NewNotificatorer(emailNotificatorer)
+
+	router, err := routergin.NewRouterGin(&config, hs, tokenMaker, notificatorer)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create server engine")
 	}
