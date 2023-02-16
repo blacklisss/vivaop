@@ -25,7 +25,7 @@ INSERT INTO users (
     password,
     birthdate,
     country_id
-) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9 ) RETURNING id, fname, mname, lname, email, phone, password, birthdate, country_id, created_at, updated_at, deleted_at
+) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9 ) RETURNING id, fname, mname, lname, email, phone, password, birthdate, country_id, verified_email, verified, created_at, updated_at, deleted_at
 `
 
 type CreateUserParams struct {
@@ -63,6 +63,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg *userrepo.CreateUserParams
 		&i.Password,
 		&i.Birthdate,
 		&i.CountryID,
+		&i.VerifiedEmail,
+		&i.Verified,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -78,7 +80,11 @@ func (q *Queries) CreateUser(ctx context.Context, arg *userrepo.CreateUserParams
 		Password:  i.Password,
 		Birthday:  i.Birthdate.Time.String(),
 		CountryID: i.CountryID.Int32,
+		VerifiedEmail: i.VerifiedEmail,
+		Verified: i.Verified,
 		CreatedAt: i.CreatedAt,
+		UpdatedAt: i.UpdatedAt.Time,
+		DeletedAt: i.DeletedAt.Time,
 	}, err
 }
 
@@ -94,7 +100,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, fname, mname, lname, email, phone, password, birthdate, country_id, created_at, updated_at, deleted_at FROM users
+SELECT id, fname, mname, lname, email, phone, password, birthdate, country_id, verified_email, verified, created_at, updated_at, deleted_at FROM users
 WHERE email = $1 LIMIT 1
 `
 
@@ -111,6 +117,8 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (*userentity
 		&i.Password,
 		&i.Birthdate,
 		&i.CountryID,
+		&i.VerifiedEmail,
+		&i.Verified,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -125,12 +133,16 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (*userentity
 		Password:  i.Password,
 		Birthday:  i.Birthdate.Time.String(),
 		CountryID: i.CountryID.Int32,
+		VerifiedEmail: i.VerifiedEmail,
+		Verified: i.Verified,
 		CreatedAt: i.CreatedAt,
+		UpdatedAt: i.UpdatedAt.Time,
+		DeletedAt: i.DeletedAt.Time,
 	}, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, fname, mname, lname, email, phone, password, birthdate, country_id, created_at, updated_at, deleted_at FROM users
+SELECT id, fname, mname, lname, email, phone, password, birthdate, country_id, verified_email, verified, created_at, updated_at, deleted_at FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -147,6 +159,8 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (*userentity.Us
 		&i.Password,
 		&i.Birthdate,
 		&i.CountryID,
+		&i.VerifiedEmail,
+		&i.Verified,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -161,12 +175,16 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (*userentity.Us
 		Password:  i.Password,
 		Birthday:  i.Birthdate.Time.String(),
 		CountryID: i.CountryID.Int32,
+		VerifiedEmail: i.VerifiedEmail,
+		Verified: i.Verified,
 		CreatedAt: i.CreatedAt,
+		UpdatedAt: i.UpdatedAt.Time,
+		DeletedAt: i.DeletedAt.Time,
 	}, err
 }
 
 const getUserByPhone = `-- name: GetUserByPhone :one
-SELECT id, fname, mname, lname, email, phone, password, birthdate, country_id, created_at, updated_at, deleted_at FROM users
+SELECT id, fname, mname, lname, email, phone, password, birthdate, country_id, verified_email, verified, created_at, updated_at, deleted_at FROM users
 WHERE phone = $1 LIMIT 1
 `
 
@@ -183,6 +201,8 @@ func (q *Queries) GetUserByPhone(ctx context.Context, phone string) (*userentity
 		&i.Password,
 		&i.Birthdate,
 		&i.CountryID,
+		&i.VerifiedEmail,
+		&i.Verified,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -197,6 +217,55 @@ func (q *Queries) GetUserByPhone(ctx context.Context, phone string) (*userentity
 		Password:  i.Password,
 		Birthday:  i.Birthdate.Time.String(),
 		CountryID: i.CountryID.Int32,
+		VerifiedEmail: i.VerifiedEmail,
+		Verified: i.Verified,
 		CreatedAt: i.CreatedAt,
+		UpdatedAt: i.UpdatedAt.Time,
+		DeletedAt: i.DeletedAt.Time,
+	}, err
+}
+
+const verifyUserEmail = `-- name: VerifyUserEmail :one
+UPDATE users
+SET verified_email   = true,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, fname, mname, lname, email, phone, password, birthdate, country_id, verified_email, verified, created_at, updated_at, deleted_at
+`
+
+func (q *Queries) VerifyUserEmail(ctx context.Context, id uuid.UUID) (*userentity.User, error) {
+	row := q.db.QueryRowContext(ctx, verifyUserEmail, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Fname,
+		&i.Mname,
+		&i.Lname,
+		&i.Email,
+		&i.Phone,
+		&i.Password,
+		&i.Birthdate,
+		&i.CountryID,
+		&i.VerifiedEmail,
+		&i.Verified,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return &userentity.User{
+		ID:        i.ID,
+		FName:     i.Fname.String,
+		MName:     i.Mname.String,
+		LName:     i.Lname.String,
+		Email:     i.Email,
+		Phone:     i.Phone,
+		Password:  i.Password,
+		Birthday:  i.Birthdate.Time.String(),
+		CountryID: i.CountryID.Int32,
+		VerifiedEmail: i.VerifiedEmail,
+		Verified: i.Verified,
+		CreatedAt: i.CreatedAt,
+		UpdatedAt: i.UpdatedAt.Time,
+		DeletedAt: i.DeletedAt.Time,
 	}, err
 }

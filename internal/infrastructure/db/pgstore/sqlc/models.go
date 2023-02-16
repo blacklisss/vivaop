@@ -62,13 +62,22 @@ type User struct {
 	// middle name
 	Mname sql.NullString `json:"mname"`
 	// last name
-	Lname     sql.NullString `json:"lname"`
-	Email     string         `json:"email"`
-	Phone     string         `json:"phone"`
-	Password  string         `json:"password"`
-	Birthdate sql.NullTime   `json:"birthdate"`
-	CountryID sql.NullInt32  `json:"country_id"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt sql.NullTime   `json:"updated_at"`
-	DeletedAt sql.NullTime   `json:"deleted_at"`
+	Lname         sql.NullString `json:"lname"`
+	Email         string         `json:"email"`
+	Phone         string         `json:"phone"`
+	Password      string         `json:"password"`
+	Birthdate     sql.NullTime   `json:"birthdate"`
+	CountryID     sql.NullInt32  `json:"country_id"`
+	VerifiedEmail bool           `json:"verified_email"`
+	Verified      bool           `json:"verified"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     sql.NullTime   `json:"updated_at"`
+	DeletedAt     sql.NullTime   `json:"deleted_at"`
+}
+
+type VerifyEmail struct {
+	UserID    uuid.UUID `json:"user_id"`
+	Token     string    `json:"token"`
+	ExpiredAt time.Time `json:"expired_at"`
+	CreatedAt time.Time `json:"created_at"`
 }

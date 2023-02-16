@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type createUserRequest struct {
@@ -96,7 +97,30 @@ func (router *RouterGin) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println(user)
+	emailToken := util.GetMD5Hash(user.ID.String())
+	for {
+		_, err = router.hs.CheckEmailToken(ctx, emailToken)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				break
+			}
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+	}
+
+	expireAt := util.CreateExpireDate(router.config.EmailTokenExpire)
+	emailVerification, err := router.hs.CreateEmailVerification(ctx, &userrepo.CreateEmailVerificationParams{
+		UserID:    user.ID,
+		Token:     emailToken,
+		ExpiredAt: expireAt,
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	fmt.Println(emailVerification)
 	resp := newUserResponse(user)
 	ctx.JSON(http.StatusOK, resp)
 }

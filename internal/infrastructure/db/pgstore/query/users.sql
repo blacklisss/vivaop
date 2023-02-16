@@ -23,6 +23,13 @@ WHERE email = $1 LIMIT 1;
 SELECT * FROM users
 WHERE phone = $1 LIMIT 1;
 
+-- name: VerifyUserEmail :one
+UPDATE users
+SET verified_email   = true,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING *;
+
 -- name: DeleteUser :exec
 DELETE
 FROM users

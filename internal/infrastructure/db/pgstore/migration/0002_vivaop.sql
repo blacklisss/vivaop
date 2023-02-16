@@ -84,6 +84,8 @@ COMMENT ON COLUMN "users"."lname" IS 'last name';
 
 ALTER TABLE "users" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
 
+ALTER TABLE "verify_email" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
 ALTER TABLE "organizations" ADD FOREIGN KEY ("country_id") REFERENCES "countries" ("id");
 
 ALTER TABLE "organizations" ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");

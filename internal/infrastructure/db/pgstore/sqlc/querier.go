@@ -23,16 +23,19 @@ import (
 type Querier interface {
 	AddRegistrationImage(ctx context.Context, params *organizationrepo.UploadOrganizationParams) (*organizationentity.Organization, error)
 	CreateCountry(ctx context.Context, args *countryrepo.CreateCountryParams) (*countryentity.Country, error)
+	CreateEmailVerification(ctx context.Context, args *userrepo.CreateEmailVerificationParams) (*userentity.EmailVerification, error)
 	CreateOrganization(ctx context.Context, params *organizationrepo.CreateOrganizationParams) (*organizationentity.Organization, error)
 	CreateOrganizationContact(ctx context.Context, arg *organization_contact_repo.CreateOrganizationContactParams) (*organization_contact_entity.OrganizationContact, error)
 	CreateSession(ctx context.Context, arg *sessionrepo.CreateSessionParams) (*sessionentity.Session, error)
 	CreateUser(ctx context.Context, arg *userrepo.CreateUserParams) (*userentity.User, error)
 	DeleteCountry(ctx context.Context, id int32) error
+	DeleteEmailVerification(ctx context.Context, userID uuid.UUID) error
 	DeleteOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
 	DeleteOrganizationContact(ctx context.Context, id uuid.UUID) (*organization_contact_entity.OrganizationContact, error)
 	DeleteSession(ctx context.Context, id uuid.UUID) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 	GetCountry(ctx context.Context, id int32) (*countryentity.Country, error)
+	GetEmailVerification(ctx context.Context, token string) (*userentity.EmailVerification, error)
 	GetOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
 	GetOrganizationByOwner(ctx context.Context, params *organizationrepo.GetOrganizationByOwnerParams) (*organizationentity.Organization, error)
 	GetOrganizationContact(ctx context.Context, id uuid.UUID) (*organization_contact_entity.OrganizationContact, error)
@@ -47,6 +50,7 @@ type Querier interface {
 	UpdateCountry(ctx context.Context, arg UpdateCountryParams) (Country, error)
 	UpdateOrganization(ctx context.Context, arg *organizationrepo.UpdateOrganizationParams) (*organizationentity.Organization, error)
 	VerifyOrganization(ctx context.Context, id uuid.UUID) (*organizationentity.Organization, error)
+	VerifyUserEmail(ctx context.Context, id uuid.UUID) (*userentity.User, error)
 }
 
 var _ Querier = (*Queries)(nil)

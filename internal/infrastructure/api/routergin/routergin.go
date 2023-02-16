@@ -44,6 +44,7 @@ func (router *RouterGin) setupRouter(r *gin.Engine) {
 
 	r.POST("/users", router.CreateUser)
 	r.POST("/users/login", router.loginUser)
+	r.GET("/email/verify/:token", router.VerifyUserEmail)
 	r.POST("/tokens/renew_access", router.renewAccessToken)
 	r.POST("/search", router.SearchOrganizations)
 	r.GET("/organization/:id", router.GetOrganization)
