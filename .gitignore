@@ -103,3 +103,11 @@ Temporary Items
 mntdata
 
 uploads
+
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.pdf
+*.svg
+
