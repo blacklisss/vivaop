@@ -111,3 +111,5 @@ uploads
 *.pdf
 *.svg
 
+app.env
+
